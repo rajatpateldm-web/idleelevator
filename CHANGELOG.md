@@ -9,6 +9,9 @@
 
 ### Working Systems (v0.4.0)
 - Elevator movement between floors (0–5) with animated door open/close
+- Responsive UI & Readability System (`www/config/uiConfig.js`): centralized crisp text rendering and font scaling policies (10px–16px baseline defaults) across HUD, Upgrade Cards, Floor Buttons, and Modals
+- Standardized minimum 40x40 logical pixel touch targets for buttons and interactive controls across mobile viewports
+- High-DPI screen resolution scaling via Phaser renderer devicePixelRatio configuration
 - Passenger spawning, patience timers, and queue management per floor
 - Staircase walkout animation when patience expires
 - Shop tenants with passive rent, contract timers, and grace periods

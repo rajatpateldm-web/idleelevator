@@ -26,6 +26,8 @@ export function registerHUDUpdater(fn) {
     onHUDUpdateCallback = fn;
 }
 
+import { createCrispText, getTouchBounds } from '../config/uiConfig.js';
+
 // ─── 1. Missions Modal ───────────────────────────────────────────────
 
 export function openMissionsModal(scene) {
@@ -38,8 +40,20 @@ export function openMissionsModal(scene) {
     const overlay = scene.add.rectangle(180, centerY, 360, 640, 0x000000, 0.8).setInteractive();
     const modalBg = scene.add.rectangle(180, centerY, 324, 430, 0x111827).setStrokeStyle(2, 0x14b8a6);
 
-    const title = scene.add.text(180, centerY - 185, '📜 ACTIVE MISSIONS', { fontSize: '14px', color: '#5eead4', fontStyle: 'bold' }).setOrigin(0.5);
-    const subTitle = scene.add.text(180, centerY - 168, 'Complete real elevator operations to earn instant rewards!', { fontSize: '8.5px', color: '#94a3b8' }).setOrigin(0.5);
+    const title = createCrispText(scene, 180, centerY - 185, '📜 ACTIVE MISSIONS', {
+        category: 'PRIMARY',
+        fontSize: 15,
+        color: '#5eead4',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
+
+    const subTitle = createCrispText(scene, 180, centerY - 165, 'Complete real elevator operations to earn instant rewards!', {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
+        color: '#94a3b8',
+        origin: 0.5
+    });
 
     const missionElements = [];
 
@@ -47,18 +61,39 @@ export function openMissionsModal(scene) {
         const itemY = centerY - 105 + (index * 95);
         const cardBg = scene.add.rectangle(180, itemY, 296, 84, 0x1f2937).setStrokeStyle(1.2, m.completed ? 0x10b981 : 0x374151);
 
-        const mTitle = scene.add.text(42, itemY - 28, `${index + 1}. ${m.desc}`, { fontSize: '10px', color: '#f8fafc', fontStyle: 'bold' });
-        const mProgressText = scene.add.text(42, itemY - 12, `Progress: ${m.progress} / ${m.target}`, { fontSize: '9px', color: '#cbd5e1' });
+        const mTitle = createCrispText(scene, 42, itemY - 30, `${index + 1}. ${m.desc}`, {
+            category: 'BODY_MODAL',
+            fontSize: 12,
+            color: '#f8fafc',
+            fontStyle: 'bold'
+        });
+
+        const mProgressText = createCrispText(scene, 42, itemY - 12, `Progress: ${m.progress} / ${m.target}`, {
+            category: 'SECONDARY_LABEL',
+            fontSize: 11,
+            color: '#cbd5e1'
+        });
 
         const barBg = scene.add.rectangle(110, itemY + 6, 136, 8, 0x111827).setStrokeStyle(1, 0x4b5563);
         const pct = Math.min(1.0, m.progress / m.target);
         const barFill = scene.add.rectangle(42, itemY + 6, 136 * pct, 8, m.completed ? 0x10b981 : 0x0ea5e9).setOrigin(0, 0.5);
 
-        const rewardLabel = scene.add.text(42, itemY + 24, `Reward: +${m.rewardCoins} 💰 +${m.rewardTips || 0} 💎`, { fontSize: '9px', color: '#facc15', fontStyle: 'bold' });
+        const rewardLabel = createCrispText(scene, 42, itemY + 22, `Reward: +${m.rewardCoins} 💰 +${m.rewardTips || 0} 💎`, {
+            category: 'SECONDARY_LABEL',
+            fontSize: 11,
+            color: '#facc15',
+            fontStyle: 'bold'
+        });
 
         const isReadyToClaim = m.completed && !m.claimed;
-        const claimBtn = scene.add.rectangle(264, itemY + 6, 68, 36, isReadyToClaim ? 0x059669 : 0x374151).setInteractive({ useHandCursor: isReadyToClaim }).setStrokeStyle(1, isReadyToClaim ? 0x34d399 : 0x4b5563);
-        const claimText = scene.add.text(264, itemY + 6, isReadyToClaim ? 'CLAIM' : 'ACTIVE', { fontSize: '9.5px', color: isReadyToClaim ? '#ffffff' : '#9ca3af', fontStyle: 'bold' }).setOrigin(0.5);
+        const claimBtn = scene.add.rectangle(264, itemY + 6, 68, 40, isReadyToClaim ? 0x059669 : 0x374151).setInteractive({ useHandCursor: isReadyToClaim }).setStrokeStyle(1, isReadyToClaim ? 0x34d399 : 0x4b5563);
+        const claimText = createCrispText(scene, 264, itemY + 6, isReadyToClaim ? 'CLAIM' : 'ACTIVE', {
+            category: 'PRIMARY_BUTTON',
+            fontSize: 12,
+            color: isReadyToClaim ? '#ffffff' : '#9ca3af',
+            fontStyle: 'bold',
+            origin: 0.5
+        });
 
         if (isReadyToClaim) {
             claimBtn.on('pointerdown', () => {
@@ -69,7 +104,14 @@ export function openMissionsModal(scene) {
         missionElements.push(cardBg, mTitle, mProgressText, barBg, barFill, rewardLabel, claimBtn, claimText);
     });
 
-    const closeBtn = scene.add.text(180, centerY + 185, '[ CLOSE MISSIONS ]', { fontSize: '11px', color: '#ef4444', fontStyle: 'bold' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const closeBtn = createCrispText(scene, 180, centerY + 185, '[ CLOSE MISSIONS ]', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 13,
+        color: '#ef4444',
+        fontStyle: 'bold',
+        origin: 0.5
+    }).setInteractive({ useHandCursor: true });
+
     closeBtn.on('pointerdown', () => {
         playSound('click');
         hideMissionsModal();
@@ -119,25 +161,90 @@ export function openHQManagementModal(scene) {
     const centerY = currentCamY + 320;
 
     const overlay = scene.add.rectangle(180, centerY, 360, 640, 0x000000, 0.8).setInteractive();
-    const modalBg = scene.add.rectangle(180, centerY, 320, 420, 0x161b22).setStrokeStyle(2, 0x58a6ff);
+    const modalBg = scene.add.rectangle(180, centerY, 320, 430, 0x161b22).setStrokeStyle(2, 0x58a6ff);
 
-    const title = scene.add.text(180, centerY - 180, `🏢 SKYSCRAPER MANAGEMENT`, { fontSize: '13px', color: '#58a6ff', fontStyle: 'bold' }).setOrigin(0.5);
-    const subTitle = scene.add.text(180, centerY - 162, `Building Tier: Level ${playerState.skyscraperLevel} | Management Tokens: 🏆 ${playerState.prestigeTokens}`, { fontSize: '9px', color: '#f39c12' }).setOrigin(0.5);
+    const title = createCrispText(scene, 180, centerY - 185, `🏢 SKYSCRAPER MANAGEMENT`, {
+        category: 'PRIMARY',
+        fontSize: 15,
+        color: '#58a6ff',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
-    const statsBox = scene.add.rectangle(180, centerY - 75, 290, 80, 0x0d1117).setStrokeStyle(1, 0x30363d);
-    const statsHeader = scene.add.text(180, centerY - 105, '📊 SKYSCRAPER VITAL STATS', { fontSize: '9px', color: '#8b949e', fontStyle: 'bold' }).setOrigin(0.5);
-    const stat1 = scene.add.text(45, centerY - 90, `• Total Served: ${playerState.totalPassengersServedLifetime} (⭐ ${playerState.specialPassengersTransported} Specials)`, { fontSize: '8px', color: '#c9d1d9' });
-    const stat2 = scene.add.text(45, centerY - 76, `• Best Service Streak: 🔥 x${playerState.maxServiceComboLifetime} Combo | Rating: ⭐ ${buildingState.buildingRating.toFixed(1)} / 5.0`, { fontSize: '8px', color: '#c9d1d9' });
-    const stat3 = scene.add.text(45, centerY - 62, `• Elevator Capacity: ${elevatorState.elevatorCapacity} | Speed: ${elevatorState.moveDuration}ms`, { fontSize: '8px', color: '#c9d1d9' });
-    const stat4 = scene.add.text(45, centerY - 48, `• Multipliers: ${sessionState.investorBoostTimeRemaining > 0 ? '⚡ 1.5x (Investor Surge)' : '1.0x Normal'} ${sessionState.serviceCombo >= 2 ? `| 🔥 +${Math.min(40, sessionState.serviceCombo * 4)}% Combo` : ''}`, { fontSize: '8px', color: '#10b981', fontStyle: 'bold' });
+    const subTitle = createCrispText(scene, 180, centerY - 165, `Building Tier: Level ${playerState.skyscraperLevel} | Tokens: 🏆 ${playerState.prestigeTokens}`, {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
+        color: '#f39c12',
+        origin: 0.5
+    });
+
+    const statsBox = scene.add.rectangle(180, centerY - 75, 290, 84, 0x0d1117).setStrokeStyle(1, 0x30363d);
+    const statsHeader = createCrispText(scene, 180, centerY - 106, '📊 SKYSCRAPER VITAL STATS', {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
+        color: '#8b949e',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
+
+    const stat1 = createCrispText(scene, 42, centerY - 92, `• Total Served: ${playerState.totalPassengersServedLifetime} (⭐ ${playerState.specialPassengersTransported} Specials)`, {
+        category: 'BODY_MODAL',
+        fontSize: 10.5,
+        color: '#c9d1d9'
+    });
+
+    const stat2 = createCrispText(scene, 42, centerY - 77, `• Best Service Streak: 🔥 x${playerState.maxServiceComboLifetime} Combo | Rating: ⭐ ${buildingState.buildingRating.toFixed(1)}`, {
+        category: 'BODY_MODAL',
+        fontSize: 10.5,
+        color: '#c9d1d9'
+    });
+
+    const stat3 = createCrispText(scene, 42, centerY - 62, `• Elevator Capacity: ${elevatorState.elevatorCapacity} | Speed: ${elevatorState.moveDuration}ms`, {
+        category: 'BODY_MODAL',
+        fontSize: 10.5,
+        color: '#c9d1d9'
+    });
+
+    const stat4 = createCrispText(scene, 42, centerY - 47, `• Multipliers: ${sessionState.investorBoostTimeRemaining > 0 ? '⚡ 1.5x Surge' : '1.0x Normal'} ${sessionState.serviceCombo >= 2 ? `| 🔥 +${Math.min(40, sessionState.serviceCombo * 4)}% Combo` : ''}`, {
+        category: 'BODY_MODAL',
+        fontSize: 10.5,
+        color: '#10b981',
+        fontStyle: 'bold'
+    });
 
     const curModel = ELEVATOR_MODELS[playerState.currentElevatorModelIndex] || ELEVATOR_MODELS[0];
-    const elevatorBox = scene.add.rectangle(180, centerY + 5, 290, 48, 0x1a2332).setStrokeStyle(1, 0x388bfd);
-    const elevHeader = scene.add.text(180, centerY - 11, `🛗 LIFT MODEL: ${curModel.name} (+${Math.round(curModel.bonusTipPct * 100)}% Tips)`, { fontSize: '8.5px', color: '#58a6ff', fontStyle: 'bold' }).setOrigin(0.5);
+    const elevatorBox = scene.add.rectangle(180, centerY + 5, 290, 50, 0x1a2332).setStrokeStyle(1, 0x388bfd);
+    const elevHeader = createCrispText(scene, 180, centerY - 12, `🛗 LIFT MODEL: ${curModel.name} (+${Math.round(curModel.bonusTipPct * 100)}% Tips)`, {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
+        color: '#58a6ff',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
-    const prevModelBtn = scene.add.text(50, centerY + 9, '◀ PREV', { fontSize: '9px', color: '#facc15', fontStyle: 'bold' }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
-    const nextModelBtn = scene.add.text(310, centerY + 9, 'NEXT ▶', { fontSize: '9px', color: '#facc15', fontStyle: 'bold' }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
-    const modelStatus = scene.add.text(180, centerY + 9, playerState.prestigeTokens >= curModel.minPrestige ? '✅ ACTIVE' : `🔒 Needs 🏆${curModel.minPrestige} Tokens`, { fontSize: '8px', color: playerState.prestigeTokens >= curModel.minPrestige ? '#2ecc71' : '#e74c3c', fontStyle: 'bold' }).setOrigin(0.5);
+    const prevModelBtn = createCrispText(scene, 45, centerY + 9, '◀ PREV', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 11,
+        color: '#facc15',
+        fontStyle: 'bold',
+        origin: [0, 0.5]
+    }).setInteractive({ useHandCursor: true });
+
+    const nextModelBtn = createCrispText(scene, 315, centerY + 9, 'NEXT ▶', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 11,
+        color: '#facc15',
+        fontStyle: 'bold',
+        origin: [1, 0.5]
+    }).setInteractive({ useHandCursor: true });
+
+    const modelStatus = createCrispText(scene, 180, centerY + 9, playerState.prestigeTokens >= curModel.minPrestige ? '✅ ACTIVE' : `🔒 Needs 🏆${curModel.minPrestige} Tokens`, {
+        category: 'SECONDARY_LABEL',
+        fontSize: 10.5,
+        color: playerState.prestigeTokens >= curModel.minPrestige ? '#2ecc71' : '#e74c3c',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
     prevModelBtn.on('pointerdown', () => {
         playSound('click');
@@ -158,13 +265,33 @@ export function openHQManagementModal(scene) {
     const tokenReward = Math.max(1, (buildingState.unlockedFloors.length - 2) + Math.floor(elevatorState.capacityLevel / 2) + Math.floor(elevatorState.speedLevel / 2));
     const canPrestige = buildingState.unlockedFloors.length >= 5 || elevatorState.capacityLevel >= 4;
     const prestigeBg = scene.add.rectangle(180, centerY + 85, 290, 78, canPrestige ? 0x2e1065 : 0x181e26).setStrokeStyle(1.5, canPrestige ? 0xa855f7 : 0x3b4457);
-    const prestigeTitle = scene.add.text(180, centerY + 53, '🏗️ REDEVELOP BUILDING (PRESTIGE)', { fontSize: '9px', color: canPrestige ? '#c084fc' : '#94a3b8', fontStyle: 'bold' }).setOrigin(0.5);
-    const prestigeDesc = scene.add.text(180, centerY + 73, canPrestige
-        ? `Receive: 🏆 +${tokenReward} Management Tokens\n(+${tokenReward * 5}% Speed/Rent/Offline, +${tokenReward * 3}% Tips)`
-        : 'Requirement: Floor 5 Unlocked or Capacity Lv. 4+', { fontSize: '7.5px', color: canPrestige ? '#f1c40f' : '#cbd5e1', align: 'center', fontStyle: 'bold' }).setOrigin(0.5);
+    const prestigeTitle = createCrispText(scene, 180, centerY + 53, '🏗️ REDEVELOP BUILDING (PRESTIGE)', {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
+        color: canPrestige ? '#c084fc' : '#94a3b8',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
-    const prestigeBtn = scene.add.rectangle(180, centerY + 105, 170, 22, canPrestige ? 0x7e22ce : 0x334155).setInteractive({ useHandCursor: canPrestige }).setStrokeStyle(1, 0xffffff, 0.4);
-    const prestigeBtnText = scene.add.text(180, centerY + 105, canPrestige ? `[ REDEVELOP (🏆 +${tokenReward}) ]` : '🔒 REDEVELOP LOCKED', { fontSize: '8px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
+    const prestigeDesc = createCrispText(scene, 180, centerY + 73, canPrestige
+        ? `Receive: 🏆 +${tokenReward} Management Tokens\n(+${tokenReward * 5}% Speed/Rent, +${tokenReward * 3}% Tips)`
+        : 'Requirement: Floor 5 Unlocked or Capacity Lv. 4+', {
+        category: 'BODY_MODAL',
+        fontSize: 10,
+        color: canPrestige ? '#f1c40f' : '#cbd5e1',
+        align: 'center',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
+
+    const prestigeBtn = scene.add.rectangle(180, centerY + 105, 180, 24, canPrestige ? 0x7e22ce : 0x334155).setInteractive({ useHandCursor: canPrestige }).setStrokeStyle(1, 0xffffff, 0.4);
+    const prestigeBtnText = createCrispText(scene, 180, centerY + 105, canPrestige ? `[ REDEVELOP (🏆 +${tokenReward}) ]` : '🔒 REDEVELOP LOCKED', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 11,
+        color: '#ffffff',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
     if (canPrestige) {
         prestigeBtn.on('pointerdown', () => {
@@ -174,7 +301,14 @@ export function openHQManagementModal(scene) {
         });
     }
 
-    const closeBtn = scene.add.text(180, centerY + 175, '[ CLOSE MANAGEMENT ]', { fontSize: '11px', color: '#e74c3c', fontStyle: 'bold' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const closeBtn = createCrispText(scene, 180, centerY + 175, '[ CLOSE MANAGEMENT ]', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 13,
+        color: '#e74c3c',
+        fontStyle: 'bold',
+        origin: 0.5
+    }).setInteractive({ useHandCursor: true });
+
     closeBtn.on('pointerdown', () => {
         playSound('click');
         hideHQModal();
@@ -246,13 +380,33 @@ export function openBreakdownModal(scene) {
     const centerY = currentCamY + 320;
 
     const overlay = scene.add.rectangle(180, centerY, 360, 640, 0x000000, 0.7).setInteractive();
-    const modalBg = scene.add.rectangle(180, centerY, 290, 180, 0x202633).setStrokeStyle(2, 0xe74c3c);
+    const modalBg = scene.add.rectangle(180, centerY, 290, 190, 0x202633).setStrokeStyle(2, 0xe74c3c);
 
-    const header = scene.add.text(180, centerY - 65, '⚠️ LIFT MALFUNCTION', { fontSize: '14px', color: '#ff4757', fontStyle: 'bold' }).setOrigin(0.5);
-    const desc = scene.add.text(180, centerY - 40, 'Lift reached wear limit!\nFix now before ratings crash!', { fontSize: '10px', color: '#cbd5e1', align: 'center' }).setOrigin(0.5);
+    const header = createCrispText(scene, 180, centerY - 65, '⚠️ LIFT MALFUNCTION', {
+        category: 'PRIMARY',
+        fontSize: 15,
+        color: '#ff4757',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
-    const coinRepairBtn = scene.add.rectangle(125, centerY + 30, 110, 42, 0x27ae60).setInteractive({ useHandCursor: true }).setStrokeStyle(1.2, 0xffffff, 0.3);
-    const coinRepairText = scene.add.text(125, centerY + 30, `🔧 STANDARD\n${BREAKDOWN_BALANCE.STANDARD_REPAIR_COST} 💰 (${BREAKDOWN_BALANCE.STANDARD_REPAIR_DURATION_SEC}s)`, { fontSize: '10px', color: '#ffffff', align: 'center', fontStyle: 'bold' }).setOrigin(0.5);
+    const desc = createCrispText(scene, 180, centerY - 40, 'Lift reached wear limit!\nFix now before ratings crash!', {
+        category: 'BODY_MODAL',
+        fontSize: 12,
+        color: '#cbd5e1',
+        align: 'center',
+        origin: 0.5
+    });
+
+    const coinRepairBtn = scene.add.rectangle(125, centerY + 30, 110, 44, 0x27ae60).setInteractive({ useHandCursor: true }).setStrokeStyle(1.2, 0xffffff, 0.3);
+    const coinRepairText = createCrispText(scene, 125, centerY + 30, `🔧 STANDARD\n${BREAKDOWN_BALANCE.STANDARD_REPAIR_COST} 💰 (${BREAKDOWN_BALANCE.STANDARD_REPAIR_DURATION_SEC}s)`, {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 11,
+        color: '#ffffff',
+        align: 'center',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
     coinRepairBtn.on('pointerdown', () => {
         playSound('click');
@@ -267,8 +421,15 @@ export function openBreakdownModal(scene) {
         }
     });
 
-    const adRepairBtn = scene.add.rectangle(235, centerY + 30, 95, 42, 0xd35400).setInteractive({ useHandCursor: true }).setStrokeStyle(1.2, 0xffffff, 0.3);
-    const adRepairText = scene.add.text(235, centerY + 30, '⚡ FAST FIX\nWatch Ad (0s)', { fontSize: '10px', color: '#ffffff', align: 'center', fontStyle: 'bold' }).setOrigin(0.5);
+    const adRepairBtn = scene.add.rectangle(235, centerY + 30, 95, 44, 0xd35400).setInteractive({ useHandCursor: true }).setStrokeStyle(1.2, 0xffffff, 0.3);
+    const adRepairText = createCrispText(scene, 235, centerY + 30, '⚡ FAST FIX\nWatch Ad (0s)', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 11,
+        color: '#ffffff',
+        align: 'center',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
     adRepairBtn.on('pointerdown', () => {
         showRewardedAdForInstantRepair(scene);
@@ -299,18 +460,39 @@ export function openAdvertisingModal(scene, floor) {
     const premTier = (floorDef.advertisingTiers && floorDef.advertisingTiers.Premium) || { name: 'Premium Tenant', rent: 6, cost: 50, duration: 450 };
 
     const overlay = scene.add.rectangle(180, centerY, 360, 640, 0x000000, 0.75).setInteractive();
-    const modalBg = scene.add.rectangle(180, centerY, 310, 265, 0x202633).setStrokeStyle(2, 0x388bfd);
+    const modalBg = scene.add.rectangle(180, centerY, 310, 275, 0x202633).setStrokeStyle(2, 0x388bfd);
 
-    const header = scene.add.text(180, centerY - 110, `📢 LEASE FLOOR ${floor}: ${floorDef.name}`, { fontSize: '11px', color: '#58a6ff', fontStyle: 'bold' }).setOrigin(0.5);
-    const desc = scene.add.text(180, centerY - 92, `Rating: ⭐ ${buildingState.buildingRating.toFixed(1)} / 5.0`, { fontSize: '10px', color: '#f39c12', fontStyle: 'bold' }).setOrigin(0.5);
+    const header = createCrispText(scene, 180, centerY - 115, `📢 LEASE FLOOR ${floor}: ${floorDef.name}`, {
+        category: 'PRIMARY',
+        fontSize: 14,
+        color: '#58a6ff',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
+
+    const desc = createCrispText(scene, 180, centerY - 95, `Rating: ⭐ ${buildingState.buildingRating.toFixed(1)} / 5.0`, {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11.5,
+        color: '#f39c12',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
     const opt1BT = stdTier.businessType ? BUSINESS_TYPES[stdTier.businessType] : null;
     const opt1BTLabel = opt1BT ? ` ${opt1BT.label}` : '';
     const opt1Cost = stdTier.cost;
     const opt1Rent = stdTier.rent;
-    const opt1Bg = scene.add.rectangle(180, centerY - 55, 270, 40, 0x238636).setInteractive({ useHandCursor: true }).setStrokeStyle(1, 0xffffff, 0.3);
+    const opt1Bg = scene.add.rectangle(180, centerY - 55, 270, 44, 0x238636).setInteractive({ useHandCursor: true }).setStrokeStyle(1, 0xffffff, 0.3);
     const opt1Line2 = opt1BT ? opt1BT.desc : `${stdTier.name} (+${opt1Rent} 💰/6s, 5m)`;
-    const opt1Text = scene.add.text(180, centerY - 55, `📰 LOCAL FLYERS (${opt1Cost} 💰) —${opt1BTLabel}\n${opt1Line2}`, { fontSize: '8.5px', color: '#ffffff', align: 'center', fontStyle: 'bold', wordWrap: { width: 260 } }).setOrigin(0.5);
+    const opt1Text = createCrispText(scene, 180, centerY - 55, `📰 LOCAL FLYERS (${opt1Cost} 💰) —${opt1BTLabel}\n${opt1Line2}`, {
+        category: 'BODY_MODAL',
+        fontSize: 10.5,
+        color: '#ffffff',
+        align: 'center',
+        fontStyle: 'bold',
+        wordWrap: { width: 260 },
+        origin: 0.5
+    });
 
     opt1Bg.on('pointerdown', () => {
         playSound('click');
@@ -329,12 +511,20 @@ export function openAdvertisingModal(scene, floor) {
     const opt2BTLabel = opt2BT ? ` ${opt2BT.label}` : '';
     const opt2Cost = premTier.cost;
     const opt2Rent = premTier.rent;
-    const opt2Bg = scene.add.rectangle(180, centerY - 5, 270, 40, isEligibleForPremium ? 0x8957e5 : 0x484f58).setInteractive({ useHandCursor: isEligibleForPremium }).setStrokeStyle(1, 0xffffff, 0.3);
+    const opt2Bg = scene.add.rectangle(180, centerY - 5, 270, 44, isEligibleForPremium ? 0x8957e5 : 0x484f58).setInteractive({ useHandCursor: isEligibleForPremium }).setStrokeStyle(1, 0xffffff, 0.3);
     const opt2Line2 = opt2BT ? opt2BT.desc : `${premTier.name} (+${opt2Rent} 💰/6s, 7.5m)`;
     const opt2Label = isEligibleForPremium
         ? `📱 DIGITAL CAMPAIGN (${opt2Cost} 💰) —${opt2BTLabel}\n${opt2Line2}`
         : `🔒 DIGITAL CAMPAIGN (Needs ${TIMING_BALANCE.PREMIUM_CAMPAIGN_MIN_RATING}+ ⭐)\nRestore Rating to Unlock`;
-    const opt2Text = scene.add.text(180, centerY - 5, opt2Label, { fontSize: '8.5px', color: isEligibleForPremium ? '#ffffff' : '#a0aec0', align: 'center', fontStyle: 'bold', wordWrap: { width: 260 } }).setOrigin(0.5);
+    const opt2Text = createCrispText(scene, 180, centerY - 5, opt2Label, {
+        category: 'BODY_MODAL',
+        fontSize: 10.5,
+        color: isEligibleForPremium ? '#ffffff' : '#a0aec0',
+        align: 'center',
+        fontStyle: 'bold',
+        wordWrap: { width: 260 },
+        origin: 0.5
+    });
 
     if (isEligibleForPremium) {
         opt2Bg.on('pointerdown', () => {
@@ -350,14 +540,28 @@ export function openAdvertisingModal(scene, floor) {
         });
     }
 
-    const prAdBg = scene.add.rectangle(180, centerY + 45, 270, 34, 0xd35400).setInteractive({ useHandCursor: true }).setStrokeStyle(1, 0xffffff, 0.3);
-    const prAdText = scene.add.text(180, centerY + 45, '🌟 PR STUNT (Watch Ad)\nReset Rating to 5.0 ⭐ + VIP Crowd', { fontSize: '8.5px', color: '#ffffff', align: 'center', fontStyle: 'bold' }).setOrigin(0.5);
+    const prAdBg = scene.add.rectangle(180, centerY + 45, 270, 40, 0xd35400).setInteractive({ useHandCursor: true }).setStrokeStyle(1, 0xffffff, 0.3);
+    const prAdText = createCrispText(scene, 180, centerY + 45, '🌟 PR STUNT (Watch Ad)\nReset Rating to 5.0 ⭐ + VIP Crowd', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 11,
+        color: '#ffffff',
+        align: 'center',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
     prAdBg.on('pointerdown', () => {
         showRewardedAdForPRRatingBoost(scene);
     });
 
-    const closeBtn = scene.add.text(180, centerY + 98, '[ CLOSE ]', { fontSize: '10px', color: '#e74c3c', fontStyle: 'bold' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const closeBtn = createCrispText(scene, 180, centerY + 102, '[ CLOSE ]', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 12,
+        color: '#e74c3c',
+        fontStyle: 'bold',
+        origin: 0.5
+    }).setInteractive({ useHandCursor: true });
+
     closeBtn.on('pointerdown', () => {
         playSound('click');
         hideAdModal();
@@ -384,27 +588,76 @@ export function openOfflineEarningsModal(scene, data) {
     const centerY = currentCamY + 320;
 
     const overlay = scene.add.rectangle(180, centerY, 360, 640, 0x000000, 0.85).setInteractive();
-    const modalBg = scene.add.rectangle(180, centerY, 320, 420, 0x161b22).setStrokeStyle(2, 0x388bfd);
+    const modalBg = scene.add.rectangle(180, centerY, 320, 430, 0x161b22).setStrokeStyle(2, 0x388bfd);
 
-    const title = scene.add.text(180, centerY - 170, '🏢 WELCOME BACK!', { fontSize: '15px', color: '#58a6ff', fontStyle: 'bold' }).setOrigin(0.5);
-    const subTitle = scene.add.text(180, centerY - 148, 'Your skyscraper kept operating while you were away.', { fontSize: '8.5px', color: '#8b949e' }).setOrigin(0.5);
+    const title = createCrispText(scene, 180, centerY - 175, '🏢 WELCOME BACK!', {
+        category: 'PRIMARY',
+        fontSize: 15,
+        color: '#58a6ff',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
+
+    const subTitle = createCrispText(scene, 180, centerY - 152, 'Your skyscraper kept operating while you were away.', {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
+        color: '#8b949e',
+        origin: 0.5
+    });
 
     const cardBg = scene.add.rectangle(180, centerY - 60, 280, 130, 0x0d1117).setStrokeStyle(1.2, 0x30363d);
-    const timeText = scene.add.text(180, centerY - 110, `⏱️ Away for: ${data.timeStr}`, { fontSize: '10px', color: '#f39c12', fontStyle: 'bold' }).setOrigin(0.5);
+    const timeText = createCrispText(scene, 180, centerY - 110, `⏱️ Away for: ${data.timeStr}`, {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11.5,
+        color: '#f39c12',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
-    const stat1 = scene.add.text(65, centerY - 82, `👥 ${data.passengers.toLocaleString()} passengers served`, { fontSize: '10.5px', color: '#c9d1d9', fontStyle: 'bold' });
-    const stat2 = scene.add.text(65, centerY - 58, `💰 +${data.coins.toLocaleString()} coins collected`, { fontSize: '10.5px', color: '#f1c40f', fontStyle: 'bold' });
-    const stat3 = scene.add.text(65, centerY - 34, `💎 +${data.tips} bonus tips received`, { fontSize: '10.5px', color: '#00d2d3', fontStyle: 'bold' });
+    const stat1 = createCrispText(scene, 62, centerY - 82, `👥 ${data.passengers.toLocaleString()} passengers served`, {
+        category: 'BODY_MODAL',
+        fontSize: 11.5,
+        color: '#c9d1d9',
+        fontStyle: 'bold'
+    });
+
+    const stat2 = createCrispText(scene, 62, centerY - 58, `💰 +${data.coins.toLocaleString()} coins collected`, {
+        category: 'BODY_MODAL',
+        fontSize: 11.5,
+        color: '#f1c40f',
+        fontStyle: 'bold'
+    });
+
+    const stat3 = createCrispText(scene, 62, centerY - 34, `💎 +${data.tips} bonus tips received`, {
+        category: 'BODY_MODAL',
+        fontSize: 11.5,
+        color: '#00d2d3',
+        fontStyle: 'bold'
+    });
 
     const collectBtn = scene.add.rectangle(180, centerY + 45, 270, 44, 0x238636).setStrokeStyle(1.2, 0x2ea043).setInteractive({ useHandCursor: true });
-    const collectText = scene.add.text(180, centerY + 45, `[ COLLECT ]\n+${data.coins.toLocaleString()} 💰  +${data.tips} 💎`, { fontSize: '10px', color: '#ffffff', align: 'center', fontStyle: 'bold' }).setOrigin(0.5);
+    const collectText = createCrispText(scene, 180, centerY + 45, `[ COLLECT ]\n+${data.coins.toLocaleString()} 💰  +${data.tips} 💎`, {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 12,
+        color: '#ffffff',
+        align: 'center',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
     collectBtn.on('pointerdown', () => {
         collectOfflineEarnings(scene, 1);
     });
 
     const adBtn = scene.add.rectangle(180, centerY + 105, 270, 48, 0x8957e5).setStrokeStyle(1.2, 0xa371f7).setInteractive({ useHandCursor: true });
-    const adText = scene.add.text(180, centerY + 105, `🎬 [ 2X REWARD ] (Watch Ad)\n+${(data.coins * 2).toLocaleString()} 💰  +${data.tips * 2} 💎`, { fontSize: '10px', color: '#ffffff', align: 'center', fontStyle: 'bold' }).setOrigin(0.5);
+    const adText = createCrispText(scene, 180, centerY + 105, `🎬 [ 2X REWARD ] (Watch Ad)\n+${(data.coins * 2).toLocaleString()} 💰  +${data.tips * 2} 💎`, {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 12,
+        color: '#ffffff',
+        align: 'center',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
 
     adBtn.on('pointerdown', () => {
         claim2xOfflineAdReward(scene);
@@ -485,8 +738,20 @@ export function openDevEventsModal(scene) {
     const overlay = scene.add.rectangle(180, centerY, 360, 640, 0x000000, 0.8).setInteractive();
     const modalBg = scene.add.rectangle(180, centerY, 320, 420, 0x111827).setStrokeStyle(2, 0xf59e0b);
 
-    const title = scene.add.text(180, centerY - 180, '🎲 TEST RANDOM EVENTS', { fontSize: '13px', color: '#f59e0b', fontStyle: 'bold' }).setOrigin(0.5);
-    const subTitle = scene.add.text(180, centerY - 162, 'Developer tools: Manually trigger any random event', { fontSize: '8.5px', color: '#94a3b8' }).setOrigin(0.5);
+    const title = createCrispText(scene, 180, centerY - 180, '🎲 TEST RANDOM EVENTS', {
+        category: 'PRIMARY',
+        fontSize: 15,
+        color: '#f59e0b',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
+
+    const subTitle = createCrispText(scene, 180, centerY - 160, 'Developer tools: Manually trigger any random event', {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
+        color: '#94a3b8',
+        origin: 0.5
+    });
 
     const eventKeys = Object.keys(RANDOM_EVENTS);
     const elements = [];
@@ -496,11 +761,27 @@ export function openDevEventsModal(scene) {
         const itemY = centerY - 115 + (index * 58);
         const cardBg = scene.add.rectangle(180, itemY, 290, 50, 0x1f2937).setStrokeStyle(1.2, Phaser.Display.Color.HexStringToColor(evt.color).color).setInteractive({ useHandCursor: true });
 
-        const evtTitle = scene.add.text(45, itemY - 14, evt.title, { fontSize: '10.5px', color: evt.color, fontStyle: 'bold' });
-        const evtDesc = scene.add.text(45, itemY + 2, `${evt.desc} (${evt.duration}s)`, { fontSize: '8.5px', color: '#cbd5e1' });
+        const evtTitle = createCrispText(scene, 45, itemY - 14, evt.title, {
+            category: 'BODY_MODAL',
+            fontSize: 12,
+            color: evt.color,
+            fontStyle: 'bold'
+        });
 
-        const triggerBtn = scene.add.rectangle(275, itemY, 60, 30, 0x374151).setStrokeStyle(1, 0x9ca3af);
-        const triggerText = scene.add.text(275, itemY, 'START', { fontSize: '9px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
+        const evtDesc = createCrispText(scene, 45, itemY + 2, `${evt.desc} (${evt.duration}s)`, {
+            category: 'SECONDARY_LABEL',
+            fontSize: 10.5,
+            color: '#cbd5e1'
+        });
+
+        const triggerBtn = scene.add.rectangle(275, itemY, 60, 32, 0x374151).setStrokeStyle(1, 0x9ca3af);
+        const triggerText = createCrispText(scene, 275, itemY, 'START', {
+            category: 'PRIMARY_BUTTON',
+            fontSize: 11,
+            color: '#ffffff',
+            fontStyle: 'bold',
+            origin: 0.5
+        });
 
         cardBg.on('pointerdown', () => {
             triggerRandomEvent(scene, evt.id);
@@ -511,14 +792,28 @@ export function openDevEventsModal(scene) {
     });
 
     const cancelY = centerY + 145;
-    const cancelBtn = scene.add.rectangle(180, cancelY, 180, 28, 0x7f1d1d).setStrokeStyle(1, 0xef4444).setInteractive({ useHandCursor: true });
-    const cancelText = scene.add.text(180, cancelY, '⏹️ STOP CURRENT EVENT', { fontSize: '9.5px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
+    const cancelBtn = scene.add.rectangle(180, cancelY, 180, 32, 0x7f1d1d).setStrokeStyle(1, 0xef4444).setInteractive({ useHandCursor: true });
+    const cancelText = createCrispText(scene, 180, cancelY, '⏹️ STOP CURRENT EVENT', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 11,
+        color: '#ffffff',
+        fontStyle: 'bold',
+        origin: 0.5
+    });
+
     cancelBtn.on('pointerdown', () => {
         stopRandomEvent(scene);
         hideDevEventsModal();
     });
 
-    const closeBtn = scene.add.text(180, centerY + 190, '[ CLOSE DEV MENU ]', { fontSize: '10.5px', color: '#94a3b8', fontStyle: 'bold' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const closeBtn = createCrispText(scene, 180, centerY + 190, '[ CLOSE DEV MENU ]', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 12,
+        color: '#94a3b8',
+        fontStyle: 'bold',
+        origin: 0.5
+    }).setInteractive({ useHandCursor: true });
+
     closeBtn.on('pointerdown', () => {
         playSound('click');
         hideDevEventsModal();

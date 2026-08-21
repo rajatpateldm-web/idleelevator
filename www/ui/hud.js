@@ -108,45 +108,69 @@ export function updateMissionProgress(scene, eventType, amount = 1) {
     }
 }
 
+import { createCrispText, responsiveFontSize, getTouchBounds } from '../config/uiConfig.js';
+
 export function createPinnedHUD(scene) {
     // 1. Pinned Background Top Bar
     const topBar = scene.add.rectangle(180, 36, 344, 52, 0x161b22, 0.95).setDepth(100).setScrollFactor(0);
     topBar.setStrokeStyle(1.5, 0x30363d);
 
     // 2. Economy Stats
-    sessionState.coinText = scene.add.text(18, 22, `💰 ${playerState.coins}`, {
-        fontSize: '13px',
+    sessionState.coinText = createCrispText(scene, 14, 20, `💰 ${playerState.coins}`, {
+        category: 'PRIMARY',
+        fontSize: 14,
         color: '#ffdf5d',
-        fontStyle: 'bold'
-    }).setDepth(101).setScrollFactor(0);
+        fontStyle: 'bold',
+        depth: 101,
+        scrollFactor: 0
+    });
 
-    sessionState.tipText = scene.add.text(18, 40, `💎 ${playerState.tips}`, {
-        fontSize: '11px',
+    sessionState.tipText = createCrispText(scene, 14, 40, `💎 ${playerState.tips}`, {
+        category: 'SECONDARY_LABEL',
+        fontSize: 12,
         color: '#58a6ff',
-        fontStyle: 'bold'
-    }).setDepth(101).setScrollFactor(0);
+        fontStyle: 'bold',
+        depth: 101,
+        scrollFactor: 0
+    });
 
     // 3. Skyscraper Rating & Reputation Tier
     const initTier = getReputationTier();
-    sessionState.ratingText = scene.add.text(125, 22, `⭐ ${buildingState.buildingRating.toFixed(1)} / 5.0\n${initTier.label}`, {
-        fontSize: '10px',
+    sessionState.ratingText = createCrispText(scene, 120, 20, `⭐ ${buildingState.buildingRating.toFixed(1)} / 5.0\n${initTier.label}`, {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
         color: initTier.color,
         fontStyle: 'bold',
-        align: 'left'
-    }).setDepth(101).setScrollFactor(0);
+        align: 'left',
+        depth: 101,
+        scrollFactor: 0
+    });
 
     // 4. Service Combo Multiplier Text
-    sessionState.serviceComboText = scene.add.text(188, 22, '', {
-        fontSize: '9px',
+    sessionState.serviceComboText = createCrispText(scene, 185, 20, '', {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
         color: '#ff9f43',
         fontStyle: 'bold',
-        align: 'left'
-    }).setDepth(101).setScrollFactor(0).setVisible(false);
+        align: 'left',
+        depth: 101,
+        scrollFactor: 0
+    });
+    sessionState.serviceComboText.setVisible(false);
 
     // 5. Action Buttons (Missions, HQ, Audio, Dev)
     const missionsBtn = scene.add.rectangle(242, 36, 44, 40, 0x238636, 0.9).setDepth(101).setScrollFactor(0).setInteractive({ useHandCursor: true });
     missionsBtn.setStrokeStyle(1.2, 0x2ea043);
-    scene.add.text(242, 36, '📋\nTASKS', { fontSize: '9px', color: '#ffffff', align: 'center', fontStyle: 'bold' }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
+    createCrispText(scene, 242, 36, '📋\nTASKS', {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 11,
+        color: '#ffffff',
+        align: 'center',
+        fontStyle: 'bold',
+        origin: 0.5,
+        depth: 102,
+        scrollFactor: 0
+    });
     missionsBtn.on('pointerdown', () => {
         playSound('click');
         openMissionsModal(scene);
@@ -155,14 +179,35 @@ export function createPinnedHUD(scene) {
     // HQ Button
     const hqBtn = scene.add.rectangle(292, 36, 50, 40, 0x1f6feb, 0.9).setDepth(101).setScrollFactor(0).setInteractive({ useHandCursor: true });
     hqBtn.setStrokeStyle(1.2, 0x58a6ff);
-    scene.add.text(292, 36, `🏢\nLv.${playerState.skyscraperLevel}`, { fontSize: '9.5px', color: '#ffffff', align: 'center', fontStyle: 'bold' }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
+    createCrispText(scene, 292, 36, `🏢\nLv.${playerState.skyscraperLevel}`, {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 11,
+        color: '#ffffff',
+        align: 'center',
+        fontStyle: 'bold',
+        origin: 0.5,
+        depth: 102,
+        scrollFactor: 0
+    });
     hqBtn.on('pointerdown', () => {
         playSound('click');
         openHQManagementModal(scene);
     });
 
-    sessionState.soundToggleBtn = scene.add.text(338, 36, sessionState.isAudioMuted ? '🔇' : '🔊', { fontSize: '16px' }).setOrigin(0.5).setDepth(102).setScrollFactor(0).setInteractive({ useHandCursor: true });
-    sessionState.soundToggleBtn.on('pointerdown', () => {
+    // Sound Toggle Button with minimum 40x40 touch hit target
+    const soundTouchBounds = getTouchBounds(24, 24, 40);
+    const soundContainer = scene.add.container(338, 36).setDepth(102).setScrollFactor(0);
+    const soundBg = scene.add.rectangle(0, 0, soundTouchBounds.hitWidth, soundTouchBounds.hitHeight, 0x000000, 0.001)
+        .setInteractive(soundTouchBounds.hitArea, Phaser.Geom.Rectangle.Contains, { useHandCursor: true });
+
+    sessionState.soundToggleBtn = createCrispText(scene, 0, 0, sessionState.isAudioMuted ? '🔇' : '🔊', {
+        fontSize: 18,
+        origin: 0.5
+    });
+
+    soundContainer.add([soundBg, sessionState.soundToggleBtn]);
+
+    soundBg.on('pointerdown', () => {
         sessionState.isAudioMuted = !sessionState.isAudioMuted;
         sessionState.soundToggleBtn.setText(sessionState.isAudioMuted ? '🔇' : '🔊');
         if (!sessionState.isAudioMuted) playSound('click');
@@ -172,11 +217,15 @@ export function createPinnedHUD(scene) {
     // Mission / Goals Banner (Pinned sub-header)
     const objBg = scene.add.rectangle(180, 74, 344, 22, 0x0f172a, 0.95).setDepth(100).setScrollFactor(0).setInteractive({ useHandCursor: true });
     objBg.setStrokeStyle(1, 0x14b8a6);
-    sessionState.objectiveBannerText = scene.add.text(180, 74, getMissionBannerString(), {
-        fontSize: '9.5px',
+    sessionState.objectiveBannerText = createCrispText(scene, 180, 74, getMissionBannerString(), {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
         color: '#5eead4',
-        fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(101).setScrollFactor(0);
+        fontStyle: 'bold',
+        origin: 0.5,
+        depth: 101,
+        scrollFactor: 0
+    });
 
     objBg.on('pointerdown', () => {
         playSound('click');
@@ -186,11 +235,14 @@ export function createPinnedHUD(scene) {
     // Active Random Event Pinned Banner
     const eventBannerBg = scene.add.rectangle(180, 98, 344, 20, 0x18181b, 0.95).setScrollFactor(0);
     eventBannerBg.setStrokeStyle(1.2, 0xf59e0b);
-    sessionState.eventBannerText = scene.add.text(180, 98, '', {
-        fontSize: '8.5px',
+    sessionState.eventBannerText = createCrispText(scene, 180, 98, '', {
+        category: 'SECONDARY_LABEL',
+        fontSize: 10.5,
         color: '#facc15',
-        fontStyle: 'bold'
-    }).setOrigin(0.5).setScrollFactor(0);
+        fontStyle: 'bold',
+        origin: 0.5,
+        scrollFactor: 0
+    });
     sessionState.eventBannerContainer = scene.add.container(0, 0, [eventBannerBg, sessionState.eventBannerText]).setDepth(120).setVisible(false);
 
     // Development Mode Badge Button (Isolated)

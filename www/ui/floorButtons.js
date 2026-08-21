@@ -27,17 +27,24 @@ export function createFloorButtons(scene) {
     });
 }
 
+import { createCrispText, getTouchBounds } from '../config/uiConfig.js';
+
 export function createSingleFloorButton(scene, x, y, label, targetFloor) {
     const btnBg = scene.add.rectangle(x, y + 14, 30, 26, 0x21262d).setDepth(6);
     btnBg.setStrokeStyle(1.5, 0xd29922);
 
-    const text = scene.add.text(x, y + 14, label, {
-        fontSize: '11px',
-        color: '#f1e05a',
-        fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(7);
+    const touchBounds = getTouchBounds(30, 26, 40);
+    btnBg.setInteractive(touchBounds.hitArea, Phaser.Geom.Rectangle.Contains, { useHandCursor: true });
 
-    btnBg.setInteractive({ useHandCursor: true });
+    const text = createCrispText(scene, x, y + 14, label, {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 12,
+        color: '#f1e05a',
+        fontStyle: 'bold',
+        origin: 0.5,
+        depth: 7
+    });
+
     btnBg.on('pointerdown', () => {
         playSound('click');
         if (elevatorState.isBrokenDown) {

@@ -77,22 +77,32 @@ export function createBottomUpgradePanel(scene) {
     });
 }
 
+import { createCrispText } from '../config/uiConfig.js';
+
 export function createUpgradeProgressButton(scene, x, y, title, level, maxLevel, cost, color, callback) {
     const bg = scene.add.rectangle(x, y, 76, 62, color).setDepth(101).setScrollFactor(0);
     bg.setStrokeStyle(1.2, 0xffffff, 0.4);
 
-    const titleText = scene.add.text(x, y - 18, `${title} Lv.${level}`, {
-        fontSize: '9.5px',
+    const titleText = createCrispText(scene, x, y - 18, `${title} Lv.${level}`, {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 11,
         color: '#ffffff',
-        fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
+        fontStyle: 'bold',
+        origin: 0.5,
+        depth: 102,
+        scrollFactor: 0
+    });
 
     const costLabel = level >= maxLevel ? 'MAX' : `${cost} 💎`;
-    const costText = scene.add.text(x, y - 4, costLabel, {
-        fontSize: '9px',
+    const costText = createCrispText(scene, x, y - 4, costLabel, {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
         color: '#f0f6fc',
-        fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
+        fontStyle: 'bold',
+        origin: 0.5,
+        depth: 102,
+        scrollFactor: 0
+    });
 
     const progBg = scene.add.rectangle(x, y + 14, 58, 6, 0x161b22).setDepth(102).setScrollFactor(0);
     progBg.setStrokeStyle(1, 0x3d475a);
@@ -130,16 +140,24 @@ export function createCustomPinnedButton(scene, x, y, title, subtitle, color, ca
     const bg = scene.add.rectangle(x, y, 76, 62, color).setDepth(101).setScrollFactor(0);
     bg.setStrokeStyle(1.2, 0xffffff, 0.4);
 
-    const titleText = scene.add.text(x, y - 10, title, {
-        fontSize: '11px',
+    const titleText = createCrispText(scene, x, y - 10, title, {
+        category: 'PRIMARY_BUTTON',
+        fontSize: 12,
         color: '#ffffff',
-        fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
+        fontStyle: 'bold',
+        origin: 0.5,
+        depth: 102,
+        scrollFactor: 0
+    });
 
-    const subText = scene.add.text(x, y + 12, subtitle, {
-        fontSize: '9.5px',
-        color: '#f0f6fc'
-    }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
+    const subText = createCrispText(scene, x, y + 12, subtitle, {
+        category: 'SECONDARY_LABEL',
+        fontSize: 11,
+        color: '#f0f6fc',
+        origin: 0.5,
+        depth: 102,
+        scrollFactor: 0
+    });
 
     bg.setInteractive({ useHandCursor: true });
     bg.on('pointerdown', () => {
