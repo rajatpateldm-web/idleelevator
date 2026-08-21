@@ -109,6 +109,8 @@ export function spawnPassenger(scene) {
 }
 
 export function spawnCelebrityPassenger(scene) {
+    if (!scene || !scene.add) return;
+    if (passengerState.floorQueues[0].length >= TIMING_BALANCE.MAX_GROUND_QUEUE) return;
     const celebArch = ARCHETYPES.find(a => a.type === 'celebrity') || ARCHETYPES[3];
     const activeDestinations = [];
     buildingState.unlockedFloors.forEach(f => {

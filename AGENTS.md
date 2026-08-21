@@ -39,6 +39,25 @@ After modifying gameplay:
 3. Test the changed feature.
 4. Test the immediate systems it interacts with.
 
+## Testing Integrity
+
+Never describe a feature as fully tested when the required runtime test could not be executed.
+
+Distinguish clearly between:
+
+- Implemented
+- Code reviewed
+- Unit tested
+- Browser tested
+- Android tested
+
+If a required test is blocked by tooling or infrastructure:
+
+- Report the test as blocked.
+- Do not claim the feature is verified.
+- Do not repeatedly retry the same failed test.
+- Diagnose the testing problem separately.
+
 ## Save System
 
 Existing saves must remain compatible.
@@ -58,6 +77,7 @@ The game is an idle skyscraper management game.
 The elevator is the central mechanic.
 
 New systems should support:
+
 - progression
 - retention
 - player decisions
@@ -77,11 +97,13 @@ For normal tasks:
 - After completing the requested task, stop and report the result.
 
 If a task becomes significantly larger than expected:
+
 1. Stop.
 2. Explain what expanded the scope.
 3. Ask for confirmation before continuing.
 
 If a command, browser test, or subagent appears stuck:
+
 - Do not repeatedly retry it.
 - Stop the current operation.
 - Report the suspected cause.
@@ -139,4 +161,4 @@ At the end of every task, always provide a summary in exactly this format:
 - Files changed
 - What changed
 - Tests performed
-- Any remaining issue
+- Any remaining issue
