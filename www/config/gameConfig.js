@@ -9,6 +9,7 @@ export function createGameConfig(sceneConfig) {
         type: Phaser.AUTO,
         width: GAME_WIDTH,
         height: GAME_HEIGHT,
+        resolution: window.devicePixelRatio || 1,
         backgroundColor: BG_COLOR,
         scale: {
             mode: Phaser.Scale.FIT,
