@@ -2,7 +2,7 @@
 // Set ENABLED to true to activate the Dev Panel in game, or pass ?dev=true in browser URL.
 
 export const DEV_CONFIG = {
-    ENABLED: true
+    ENABLED: false
 };
 
 export function isDevModeActive() {

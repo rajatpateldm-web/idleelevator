@@ -1,0 +1,25 @@
+Read AGENTS.md and PROJECT_STATE.md.
+
+Do not modify any files.
+
+Do not run the game.
+
+Do not use subagents.
+
+Do not perform a project-wide analysis.
+
+Tell me:
+1. Whether you can read both files.
+2. The current task from PROJECT_STATE.md.
+3. The exact files you believe are relevant to that task.
+
+Then stop.
+
+For normal development, use:
+cd "/home/rajatpatel/Documents/Projects/Idle Elevator"
+npx cap sync android
+
+For a quick terminal build check:
+cd "/home/rajatpatel/Documents/Projects/Idle Elevator/android"
+./gradlew assembleDebug
+
