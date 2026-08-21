@@ -9,6 +9,7 @@ import { ECONOMY_BALANCE } from '../config/economy.js';
 import { TIMING_BALANCE } from '../config/timing.js';
 import { playSound } from '../audio/audioManager.js';
 import { showFloatingText } from '../ui/floatingText.js';
+import { restoreDayNumber, getCurrentDay } from '../systems/daySystem.js';
 
 export function createMissionInstance(templateIndex) {
     const tmpl = MISSION_TEMPLATES[templateIndex % MISSION_TEMPLATES.length];
@@ -129,6 +130,17 @@ export function loadSavedData() {
             }
             sessionState.consecutiveNoWalkout = data.consecutiveNoWalkout || 0;
 
+            // Reputation Debt — backward compatible, defaults to 0 for old saves
+            buildingState.reputationDebt = (typeof data.reputationDebt === 'number')
+                ? Math.max(0, Math.min(10, data.reputationDebt))
+                : 0;
+            buildingState._debtDecaySuccessCounter = (typeof data._debtDecaySuccessCounter === 'number')
+                ? Math.max(0, data._debtDecaySuccessCounter)
+                : 0;
+
+            // Day cycle — restore day counter; phase always restarts from MORNING on load
+            restoreDayNumber(data.currentDay || 1);
+
             if (data.shops && typeof data.shops === 'object') {
                 Object.keys(data.shops).forEach(f => {
                     const floorNum = parseInt(f, 10);
@@ -180,7 +192,10 @@ export function saveGameData() {
         lastSavedTimestamp: Date.now(),
         activeMissions: sessionState.activeMissions,
         consecutiveNoWalkout: sessionState.consecutiveNoWalkout,
-        shops: savedShops
+        shops: savedShops,
+        reputationDebt: buildingState.reputationDebt || 0,
+        _debtDecaySuccessCounter: buildingState._debtDecaySuccessCounter || 0,
+        currentDay: getCurrentDay()
     };
     if (typeof localStorage !== 'undefined' && localStorage.setItem) {
         localStorage.setItem('elevator_idle_save', JSON.stringify(data));

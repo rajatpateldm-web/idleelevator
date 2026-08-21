@@ -7,22 +7,22 @@ export const ARCHETYPES = [
     { type: 'senior', name: 'Senior', isSpecial: false, speed: 0.7, patience: 22, tipChance: 0.6, skin: 0xf5deb3, shirt: 0x8e44ad, pants: 0x7f8c8d, hair: 0xbdc3c7, tagEmoji: '' },
 
     // 1. VIP (High tip chance, high reward, requires rating >= 3.0)
-    { type: 'vip', name: 'VIP', isSpecial: true, rarity: 0.20, minRating: 3.0, speed: 1.3, patience: 14, tipChance: 0.95, coinMult: 2.5, ratingBonus: 0.08, skin: 0xffdbac, shirt: 0x16a085, pants: 0x0a3d62, hair: 0xf1c40f, badge: '⭐ VIP', badgeColor: '#f1c40f' },
+    { type: 'vip', name: 'VIP', isSpecial: true, rarity: 0.20, minRating: 3.0, speed: 1.3, patience: 14, tipChance: 0.95, coinMult: 2.5, ratingBonus: 0.04, skin: 0xffdbac, shirt: 0x16a085, pants: 0x0a3d62, hair: 0xf1c40f, badge: '⭐ VIP', badgeColor: '#f1c40f' },
 
     // 2. Celebrity (Very rare, large reward, large rating impact)
-    { type: 'celebrity', name: 'Celebrity', isSpecial: true, rarity: 0.08, minRating: 3.5, speed: 1.2, patience: 12, tipChance: 1.0, coinMult: 4.0, ratingBonus: 0.20, skin: 0xf5deb3, shirt: 0xe91e63, pants: 0x2c3e50, hair: 0xf39c12, badge: '🎤 CELEBRITY', badgeColor: '#ec4899' },
+    { type: 'celebrity', name: 'Celebrity', isSpecial: true, rarity: 0.08, minRating: 3.5, speed: 1.2, patience: 12, tipChance: 1.0, coinMult: 4.0, ratingBonus: 0.04, skin: 0xf5deb3, shirt: 0xe91e63, pants: 0x2c3e50, hair: 0xf39c12, badge: '🎤 CELEBRITY', badgeColor: '#ec4899' },
 
     // 3. Executive (Speedy, high tip chance, requires decent rating)
-    { type: 'exec', name: 'Executive', isSpecial: true, rarity: 0.22, minRating: 2.5, speed: 1.4, patience: 13, tipChance: 0.8, coinMult: 2.0, ratingBonus: 0.06, skin: 0xf1c27d, shirt: 0x2c3e50, pants: 0x1e272e, hair: 0x1a1a1a, badge: '💼 EXECUTIVE', badgeColor: '#38bdf8' },
+    { type: 'exec', name: 'Executive', isSpecial: true, rarity: 0.22, minRating: 2.5, speed: 1.4, patience: 13, tipChance: 0.8, coinMult: 2.0, ratingBonus: 0.03, skin: 0xf1c27d, shirt: 0x2c3e50, pants: 0x1e272e, hair: 0x1a1a1a, badge: '💼 EXECUTIVE', badgeColor: '#38bdf8' },
 
     // 4. Investor (Can grant a temporary building income bonus multiplier)
-    { type: 'investor', name: 'Investor', isSpecial: true, rarity: 0.12, minRating: 3.0, speed: 1.1, patience: 15, tipChance: 0.85, coinMult: 3.0, ratingBonus: 0.10, skin: 0xffdbac, shirt: 0x0f766e, pants: 0x1e293b, hair: 0x64748b, badge: '💎 INVESTOR', badgeColor: '#10b981', grantsInvestorBoost: true },
+    { type: 'investor', name: 'Investor', isSpecial: true, rarity: 0.12, minRating: 3.0, speed: 1.1, patience: 15, tipChance: 0.85, coinMult: 3.0, ratingBonus: 0.03, skin: 0xffdbac, shirt: 0x0f766e, pants: 0x1e293b, hair: 0x64748b, badge: '💎 INVESTOR', badgeColor: '#10b981', grantsInvestorBoost: true },
 
     // 5. Tourist (Random destination, longer dwell visit)
-    { type: 'tourist', name: 'Tourist', isSpecial: true, rarity: 0.18, minRating: 1.0, speed: 0.85, patience: 20, tipChance: 0.6, coinMult: 1.8, dwellMultiplier: 1.6, ratingBonus: 0.05, skin: 0xfce7f3, shirt: 0xf97316, pants: 0x0284c7, hair: 0xa855f7, badge: '📸 TOURIST', badgeColor: '#fb923c' },
+    { type: 'tourist', name: 'Tourist', isSpecial: true, rarity: 0.18, minRating: 1.0, speed: 0.85, patience: 20, tipChance: 0.6, coinMult: 1.8, dwellMultiplier: 1.6, ratingBonus: 0.02, skin: 0xfce7f3, shirt: 0xf97316, pants: 0x0284c7, hair: 0xa855f7, badge: '📸 TOURIST', badgeColor: '#fb923c' },
 
     // 6. Rusher (Very low patience, much higher reward if served before patience drops below 50%)
-    { type: 'rusher', name: 'Rusher', isSpecial: true, rarity: 0.20, minRating: 1.0, speed: 1.7, patience: 7.5, tipChance: 0.75, coinMult: 3.5, ratingBonus: 0.07, skin: 0xffedd5, shirt: 0xef4444, pants: 0x18181b, hair: 0xd97706, badge: '⚡ RUSHER', badgeColor: '#ef4444', isRusher: true }
+    { type: 'rusher', name: 'Rusher', isSpecial: true, rarity: 0.20, minRating: 1.0, speed: 1.7, patience: 7.5, tipChance: 0.75, coinMult: 3.5, ratingBonus: 0.03, skin: 0xffedd5, shirt: 0xef4444, pants: 0x18181b, hair: 0xd97706, badge: '⚡ RUSHER', badgeColor: '#ef4444', isRusher: true }
 ];
 
 // Elevator Car Cosmetic Models

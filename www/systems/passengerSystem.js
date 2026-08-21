@@ -18,6 +18,10 @@ import { modifyBuildingRating, getReputationTier } from './ratingSystem.js';
 import { checkBoarding, registerTransitionToShopDwell, registerCompleteReturnJourney } from './elevatorSystem.js';
 import { registerSpawnPassenger as registerBuildingSpawn } from '../world/building.js';
 import { registerSpawnPassenger as registerAdSpawn } from '../ads/adManager.js';
+import { getTenantTierProfile } from '../config/tenants.js';
+import { getEffectiveDemandModifiers } from './demandSystem.js';
+import { tickDebtDecay } from './reputationSystem.js';
+import { isDevModeActive } from '../config/devConfig.js';
 
 let onHUDUpdateCallback = null;
 export function registerHUDUpdater(fn) {
@@ -29,6 +33,18 @@ export function registerMissionProgress(fn) {
     onMissionProgressCallback = fn;
 }
 
+function pickWeightedArchetype(pool, weightModifier = {}) {
+    if (!pool || pool.length === 0) return null;
+    const weightedList = [];
+    pool.forEach(item => {
+        const w = Math.round((weightModifier[item.type] || 1.0) * 10);
+        for (let i = 0; i < Math.max(1, w); i++) {
+            weightedList.push(item);
+        }
+    });
+    return Phaser.Utils.Array.GetRandom(weightedList);
+}
+
 export function spawnPassenger(scene) {
     if (!scene || !scene.add) return;
     if (passengerState.floorQueues[0].length >= TIMING_BALANCE.MAX_GROUND_QUEUE) return;
@@ -37,7 +53,8 @@ export function spawnPassenger(scene) {
     buildingState.unlockedFloors.forEach(f => {
         if (f > 0 && buildingState.shops[f] && buildingState.shops[f].active) {
             const bt = getBusinessTypeForFloor(f);
-            const weight = bt ? bt.visitorFrequency : 1.0;
+            const demand = getEffectiveDemandModifiers(f);
+            const weight = (bt ? bt.visitorFrequency : 1.0) * demand.trafficRateMultiplier;
             const slots = Math.max(1, Math.round(weight * 4));
             for (let s = 0; s < slots; s++) activeDestinations.push(f);
         }
@@ -49,6 +66,14 @@ export function spawnPassenger(scene) {
     const eligibleArchetypes = ARCHETYPES.filter(a => !a.minRating || buildingState.buildingRating >= a.minRating);
     const roll = Math.random();
 
+    if (!wantsKiosk && activeDestinations.length > 0) {
+        targetFloor = Phaser.Utils.Array.GetRandom(activeDestinations);
+    }
+
+    const destBusiness = targetFloor > 0 ? getBusinessTypeForFloor(targetFloor) : null;
+    const shop = targetFloor > 0 && buildingState.shops ? buildingState.shops[targetFloor] : null;
+    const demand = targetFloor > 0 ? getEffectiveDemandModifiers(targetFloor) : getEffectiveDemandModifiers(0);
+
     let archetype;
     const comboSpecialBonus = Math.min(
         ECONOMY_BALANCE.MAX_COMBO_SPECIAL_SPAWN_BONUS,
@@ -58,29 +83,24 @@ export function spawnPassenger(scene) {
     const repSpecialMult = repTier ? repTier.specialSpawnMult : 1.0;
     const specialChance = Math.min(0.85, (ECONOMY_BALANCE.BASE_SPECIAL_SPAWN_CHANCE + comboSpecialBonus) * repSpecialMult);
 
-    if (!wantsKiosk && activeDestinations.length > 0) {
-        targetFloor = Phaser.Utils.Array.GetRandom(activeDestinations);
-    }
-
-    const destBusiness = targetFloor > 0 ? getBusinessTypeForFloor(targetFloor) : null;
     const specialPool = eligibleArchetypes.filter(a => a.isSpecial);
     const regularPool = eligibleArchetypes.filter(a => !a.isSpecial);
 
     if (destBusiness && destBusiness.attractsSpecials && specialPool.length > 0 && roll < specialChance) {
         const poolFiltered = specialPool.filter(a => destBusiness.passengerPool.includes(a.type));
         archetype = poolFiltered.length > 0
-            ? Phaser.Utils.Array.GetRandom(poolFiltered)
-            : Phaser.Utils.Array.GetRandom(specialPool);
-    } else if (destBusiness && destBusiness.passengerPool.length > 0 && Math.random() < 0.6) {
+            ? (pickWeightedArchetype(poolFiltered, demand.archetypeWeightModifier) || Phaser.Utils.Array.GetRandom(poolFiltered))
+            : (pickWeightedArchetype(specialPool, demand.archetypeWeightModifier) || Phaser.Utils.Array.GetRandom(specialPool));
+    } else if (destBusiness && destBusiness.passengerPool.length > 0 && Math.random() < 0.65) {
         const poolTypes = destBusiness.passengerPool.filter(t => !ARCHETYPES.find(a => a.type === t && a.isSpecial));
         const poolMatches = regularPool.filter(a => poolTypes.includes(a.type));
         archetype = poolMatches.length > 0
-            ? Phaser.Utils.Array.GetRandom(poolMatches)
-            : Phaser.Utils.Array.GetRandom(regularPool.length > 0 ? regularPool : eligibleArchetypes);
+            ? (pickWeightedArchetype(poolMatches, demand.archetypeWeightModifier) || Phaser.Utils.Array.GetRandom(poolMatches))
+            : (pickWeightedArchetype(regularPool.length > 0 ? regularPool : eligibleArchetypes, demand.archetypeWeightModifier) || Phaser.Utils.Array.GetRandom(eligibleArchetypes));
     } else if (specialPool.length > 0 && roll < specialChance) {
-        archetype = Phaser.Utils.Array.GetRandom(specialPool);
+        archetype = pickWeightedArchetype(specialPool, demand.archetypeWeightModifier) || Phaser.Utils.Array.GetRandom(specialPool);
     } else {
-        archetype = Phaser.Utils.Array.GetRandom(regularPool.length > 0 ? regularPool : eligibleArchetypes);
+        archetype = pickWeightedArchetype(regularPool.length > 0 ? regularPool : eligibleArchetypes, demand.archetypeWeightModifier) || Phaser.Utils.Array.GetRandom(eligibleArchetypes);
     }
 
     if (archetype.type === 'tourist' && activeDestinations.length > 0) {
@@ -92,8 +112,13 @@ export function spawnPassenger(scene) {
         targetFloor = Phaser.Utils.Array.GetRandom(activeDestinations);
     }
 
-    const passenger = createPassengerEntity(scene, archetype, targetFloor);
+    const tenantPatienceMult = targetFloor > 0 && shop ? demand.patienceMultiplier : 1.0;
+    const passenger = createPassengerEntity(scene, archetype, targetFloor, tenantPatienceMult);
     passengerState.allActivePassengers.push(passenger);
+
+    if (isDevModeActive() && targetFloor > 0) {
+        console.log(`[TENANT FEEDBACK LOOP] Floor ${targetFloor} (${shop ? shop.name : 'Shop'} | Tier: ${shop ? shop.tier : 'Standard'}) -> Archetype: ${archetype.name}, Traffic: ${demand.trafficRateMultiplier}x, Value: ${demand.fareMultiplier}x, Patience: ${passenger.maxPatience}s (${demand.patienceMultiplier}x mult)`);
+    }
 
     if (targetFloor === 0) {
         handleLobbyKioskVisitor(scene, passenger);
@@ -240,6 +265,9 @@ export function completeReturnJourney(scene, passenger) {
         sessionState.consecutiveNoWalkout++;
         onMissionProgressCallback(scene, 'no_walkout', 1);
     }
+
+    // Gradual Reputation Debt recovery — one success tick per delivery
+    tickDebtDecay();
 
     passengerState.allActivePassengers = passengerState.allActivePassengers.filter(item => item !== passenger);
 

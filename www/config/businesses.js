@@ -13,7 +13,7 @@ export const BUSINESS_TYPES = {
         coinMultiplier: 0.8,        // slightly below average ride reward
         tipMultiplier: 0.9,
         rentMultiplier: 0.7,        // lower rent – kept busy by volume
-        ratingImpact: 0.04,         // positive per satisfied visitor
+        ratingImpact: 0.01,         // positive per satisfied visitor
         attractsSpecials: false,
         desc: '☕ High footfall · Low fare · Happy vibes'
     },
@@ -30,7 +30,7 @@ export const BUSINESS_TYPES = {
         coinMultiplier: 1.0,
         tipMultiplier: 1.0,
         rentMultiplier: 1.0,
-        ratingImpact: 0.03,
+        ratingImpact: 0.01,
         attractsSpecials: false,
         desc: '🛍️ Busy floor · Mixed crowd · Medium reward'
     },
@@ -47,7 +47,7 @@ export const BUSINESS_TYPES = {
         coinMultiplier: 1.4,
         tipMultiplier: 1.3,
         rentMultiplier: 1.5,
-        ratingImpact: 0.05,
+        ratingImpact: 0.01,
         attractsSpecials: true,     // can attract exec/investor special passengers
         desc: '🏢 Steady demand · High rent · Suit crowd'
     },
@@ -64,7 +64,7 @@ export const BUSINESS_TYPES = {
         coinMultiplier: 1.1,
         tipMultiplier: 1.1,
         rentMultiplier: 1.2,
-        ratingImpact: 0.07,         // best rating-per-visit of any type
+        ratingImpact: 0.02,         // best rating-per-visit of any type
         attractsSpecials: false,
         desc: '🏋️ Long visits · Low traffic · Builds rating'
     },
@@ -81,7 +81,7 @@ export const BUSINESS_TYPES = {
         coinMultiplier: 1.2,
         tipMultiplier: 1.8,         // best tips
         rentMultiplier: 1.3,
-        ratingImpact: 0.06,
+        ratingImpact: 0.02,
         attractsSpecials: true,     // biased toward celebrity/tourist
         desc: '🎭 Variable traffic · High tips · Star power'
     },
@@ -98,7 +98,7 @@ export const BUSINESS_TYPES = {
         coinMultiplier: 2.2,
         tipMultiplier: 2.5,         // highest tip ceiling
         rentMultiplier: 2.0,
-        ratingImpact: 0.10,
+        ratingImpact: 0.02,
         attractsSpecials: true,     // strongly biased toward VIP/celebrity/investor
         desc: '💎 Rare visits · Premium reward · Elite guests'
     }

@@ -10,5 +10,7 @@ export const buildingState = {
         4: { name: 'SKYLINE FINANCIAL', desc: '💎 Penthouse Fund', tier: 'VIP', rent: 25, active: false, contractTime: 0, gracePeriod: 60, businessType: 'LUXURY', uiContainer: null, timerText: null },
         5: { name: 'STARLIGHT ASTRONOMY', desc: '🔭 Panoramic Lounge', tier: 'VIP', rent: 45, active: false, contractTime: 0, gracePeriod: 60, businessType: 'LUXURY', uiContainer: null, timerText: null }
     },
-    lockedFloorUI: {}
+    lockedFloorUI: {},
+    reputationDebt: 0
+
 };

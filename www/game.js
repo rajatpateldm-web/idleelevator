@@ -17,6 +17,8 @@ import { handleOperatorTick } from './systems/operatorSystem.js';
 import { handleShopRentAndLifecycle } from './systems/shopSystem.js';
 import { spawnPassenger, updatePassengers } from './systems/passengerSystem.js';
 import { handleRandomEventTick, triggerRandomEvent } from './ui/modals.js';
+import { tickDayCycle, startNextDay, restoreDayNumber } from './systems/daySystem.js';
+import { createDayHUD, tickDayHUD } from './ui/dayHud.js';
 
 function create() {
     const scene = this;
@@ -24,6 +26,9 @@ function create() {
     // 1. Persistence & Ad Integration
     loadSavedData();
     initAdMob();
+
+    // 1a. Restore day number from save (day cycle itself is not persisted across sessions)
+    // restoreDayNumber is called via saveManager — see saveManager.js integration
 
     // 2. Offline Idle Earnings Check
     checkAndShowOfflineEarnings(scene);
@@ -52,6 +57,9 @@ function create() {
 
     // 8. Fixed HUD & Upgrade Panels
     createPinnedHUD(scene);
+
+    // 8a. Day/Clock HUD strip (placed below existing HUD banners)
+    createDayHUD(scene);
 
     // 9. Breakdown Warning Banner
     elevatorState.breakdownBanner = scene.add.text(145, 120, '⚠️ OUT OF ORDER', {
@@ -95,7 +103,7 @@ function create() {
         loop: true
     });
 
-    // 14. Investor Boost & Random Event Countdown Loop
+    // 14. Investor Boost, Random Event & Day Cycle Countdown Loop (all share 1s tick)
     scene.time.addEvent({
         delay: TIMING_BALANCE.COUNTDOWN_TICK_MS,
         callback: () => {
@@ -109,6 +117,8 @@ function create() {
             }
 
             handleRandomEventTick(scene);
+            tickDayCycle();
+            tickDayHUD();
         },
         loop: true
     });
@@ -130,6 +140,9 @@ function create() {
     scene.input.once('pointerdown', () => {
         getAudioContext();
     });
+
+    // 17. Start Day Cycle (Day 1, MORNING phase)
+    startNextDay();
 
     // Initial Passenger Spawn
     spawnPassenger(scene);

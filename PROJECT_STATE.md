@@ -22,6 +22,9 @@ v0.4.0
 - Service combo system
 - Random events system (Shopping Rush, Corporate Event, Celebrity Visit, Power Surge, Happy Hour)
 - Offline idle earnings system (8h cap, Welcome Back modal, 2X ad doubler)
+- Tenant -> Passenger feedback loop system (data-driven tier modifiers, expectation/patience scaling, fare/tip multipliers, archetype weighting)
+- Daily Building Cycle Engine (data-driven Morning/Rushes/Closing state machine, 1s tick synchronization)
+- Day HUD (fixed screen Clock/Phase Indicator Strip, MM:SS countdown, responsive progress bar)
 
 ## Currently Building
 
@@ -40,5 +43,6 @@ Special passengers & missions
 
 ## Next
 
-1. Finish missions
-2. Add special passengers
+1. Integrate Day Cycle Rush modifiers to demand system (Phase 2 traffic multipliers)
+2. Finish missions
+3. Add special passengers

@@ -13,6 +13,7 @@ import { playSound } from '../audio/audioManager.js';
 import { showFloatingText } from './floatingText.js';
 import { saveGameData, createMissionInstance, initDefaultMissions, collectOfflineEarnings, registerOfflineModalOpener } from '../save/saveManager.js';
 import { showRewardedAdForInstantRepair, showRewardedAdForPRRatingBoost, claim2xOfflineAdReward, registerHideBreakdownModal, registerHideAdModal } from '../ads/adManager.js';
+import { getReputationDebtImpact } from '../systems/reputationSystem.js';
 import { updateElevatorCarSkin } from '../entities/elevator.js';
 import { renderFloorStructure, registerOpenAdvertisingModal } from '../world/building.js';
 import { createFloorButtons, registerOpenBreakdownModal as registerFloorButtonBreakdown } from './floorButtons.js';
@@ -507,26 +508,35 @@ export function openAdvertisingModal(scene, floor) {
     });
 
     const isEligibleForPremium = buildingState.buildingRating >= TIMING_BALANCE.PREMIUM_CAMPAIGN_MIN_RATING;
+    // Reputation Debt: apply offer availability multiplier as a stochastic gate.
+    // Debt 0-2: always available. Debt 9-10: only 35% chance of showing as available.
+    const { offerPenaltyMult } = getReputationDebtImpact();
+    const isPremiumAvailableThisOpen = isEligibleForPremium && (Math.random() < offerPenaltyMult);
     const opt2BT = premTier.businessType ? BUSINESS_TYPES[premTier.businessType] : null;
     const opt2BTLabel = opt2BT ? ` ${opt2BT.label}` : '';
     const opt2Cost = premTier.cost;
     const opt2Rent = premTier.rent;
-    const opt2Bg = scene.add.rectangle(180, centerY - 5, 270, 44, isEligibleForPremium ? 0x8957e5 : 0x484f58).setInteractive({ useHandCursor: isEligibleForPremium }).setStrokeStyle(1, 0xffffff, 0.3);
+    const opt2Bg = scene.add.rectangle(180, centerY - 5, 270, 44, isPremiumAvailableThisOpen ? 0x8957e5 : 0x484f58).setInteractive({ useHandCursor: isPremiumAvailableThisOpen }).setStrokeStyle(1, 0xffffff, 0.3);
     const opt2Line2 = opt2BT ? opt2BT.desc : `${premTier.name} (+${opt2Rent} 💰/6s, 7.5m)`;
-    const opt2Label = isEligibleForPremium
-        ? `📱 DIGITAL CAMPAIGN (${opt2Cost} 💰) —${opt2BTLabel}\n${opt2Line2}`
-        : `🔒 DIGITAL CAMPAIGN (Needs ${TIMING_BALANCE.PREMIUM_CAMPAIGN_MIN_RATING}+ ⭐)\nRestore Rating to Unlock`;
+    let opt2Label;
+    if (!isEligibleForPremium) {
+        opt2Label = `🔒 DIGITAL CAMPAIGN (Needs ${TIMING_BALANCE.PREMIUM_CAMPAIGN_MIN_RATING}+ ⭐)\nRestore Rating to Unlock`;
+    } else if (!isPremiumAvailableThisOpen) {
+        opt2Label = `⚠️ DIGITAL CAMPAIGN (Unavailable)\nReputation Debt: Service quality too low`;
+    } else {
+        opt2Label = `📱 DIGITAL CAMPAIGN (${opt2Cost} 💰) —${opt2BTLabel}\n${opt2Line2}`;
+    }
     const opt2Text = createCrispText(scene, 180, centerY - 5, opt2Label, {
         category: 'BODY_MODAL',
         fontSize: 10.5,
-        color: isEligibleForPremium ? '#ffffff' : '#a0aec0',
+        color: isPremiumAvailableThisOpen ? '#ffffff' : '#a0aec0',
         align: 'center',
         fontStyle: 'bold',
         wordWrap: { width: 260 },
         origin: 0.5
     });
 
-    if (isEligibleForPremium) {
+    if (isPremiumAvailableThisOpen) {
         opt2Bg.on('pointerdown', () => {
             playSound('click');
             if (playerState.coins >= opt2Cost) {

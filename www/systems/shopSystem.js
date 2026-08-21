@@ -8,6 +8,7 @@ import { playSound } from '../audio/audioManager.js';
 import { showFloatingText } from '../ui/floatingText.js';
 import { saveGameData } from '../save/saveManager.js';
 import { renderShopSlot } from '../world/building.js';
+import { getReputationDebtImpact } from './reputationSystem.js';
 
 let onHUDUpdateCallback = null;
 export function registerHUDUpdater(fn) {
@@ -62,6 +63,20 @@ export function handleShopRentAndLifecycle(scene) {
                 showFloatingText(scene, 290, floorY[f] - 30, '💔 Tenant Left (Rating Low ⭐)', '#e74c3c');
                 saveGameData();
                 return;
+            }
+
+            // Reputation Debt vacancy risk — applies above debt threshold for non-Standard tenants
+            if (shop.gracePeriod <= 0 && shop.tier && shop.tier !== 'Standard') {
+                const { vacancyRiskFn } = getReputationDebtImpact();
+                const riskProbability = vacancyRiskFn(shop.tier);
+                if (riskProbability > 0 && Math.random() < riskProbability) {
+                    shop.active = false;
+                    renderShopSlot(scene, f);
+                    playSound('alarm');
+                    showFloatingText(scene, 290, floorY[f] - 30, `⚠️ ${shop.tier} Tenant Left (Service Issues)`, '#f39c12');
+                    saveGameData();
+                    return;
+                }
             }
 
             if (shop.contractTime <= 0) {

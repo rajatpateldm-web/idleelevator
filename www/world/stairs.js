@@ -7,6 +7,7 @@ import { playSound } from '../audio/audioManager.js';
 import { showFloatingText } from '../ui/floatingText.js';
 import { saveGameData } from '../save/saveManager.js';
 import { animateWalkTo, updateQueueDisplay } from '../entities/passenger.js';
+import { addReputationDebt } from '../systems/reputationSystem.js';
 
 let onModifyRatingCallback = null;
 export function registerModifyRating(fn) {
@@ -53,6 +54,7 @@ export function triggerStaircaseWalkout(scene, passenger) {
     if (onModifyRatingCallback) {
         onModifyRatingCallback(scene, TIMING_BALANCE.WALKOUT_RATING_PENALTY);
     }
+    addReputationDebt(1);
 
     if (!sessionState.isComboPaused) {
         sessionState.consecutiveNoWalkout = 0;

@@ -2,7 +2,7 @@
 import { floorY } from '../config/floors.js';
 import { passengerState } from '../state/passengerState.js';
 
-export function createPassengerEntity(scene, archetype, targetFloor) {
+export function createPassengerEntity(scene, archetype, targetFloor, tenantPatienceMult = 1.0) {
     const charSprite = scene.add.image(0, 0, 'tex_' + archetype.type);
 
     const isKiosk = targetFloor === 0;
@@ -38,12 +38,15 @@ export function createPassengerEntity(scene, archetype, targetFloor) {
 
     const passenger = scene.add.container(390, floorY[0] + 16, elements);
 
+    const effectivePatience = Math.max(4.0, Math.round(archetype.patience * tenantPatienceMult * 10) / 10);
+
     passenger.archetype = archetype;
     passenger.targetFloor = targetFloor;
     passenger.currentFloor = 0;
     passenger.destination = targetFloor === 0 ? 'kiosk' : 'up';
-    passenger.maxPatience = archetype.patience;
-    passenger.patience = archetype.patience;
+    passenger.tenantPatienceMult = tenantPatienceMult;
+    passenger.maxPatience = effectivePatience;
+    passenger.patience = effectivePatience;
     passenger.patienceBar = patienceBar;
     passenger.targetTag = targetTag;
     passenger.tagBg = tagBg;

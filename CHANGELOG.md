@@ -23,12 +23,16 @@
 - Investor income boost (temporary 1.5× fare multiplier)
 - Random events system (5 event types, evaluated every 75 s at 45% chance)
 - Active missions system (3 concurrent slots, auto-refreshes on claim)
+- Tenant -> Passenger feedback loop system (`www/config/tenants.js`): data-driven tenant tier profiles (`Standard`, `Premium`, `VIP`, `Luxury`) modifying traffic rate, passenger archetype weighting, expectation/patience scaling, fare, and tips while maintaining business identity (`BUSINESS_TYPES`)
 - Offline earnings calculation (capped at 8 hours, shown on return)
 - HQ Management modal with lifetime stats and prestige system
 - Elevator car model skins (4 models, gated by prestige tokens)
 - Procedural audio engine (Web Audio API, 8 sound types)
 - Auto-save every 5 seconds via localStorage
 - Browser ad fallback (all ad paths work without AdMob present)
+- Daily Building Cycle Engine (Morning, Morning Rush, Midday, Lunch Rush, Evening, Evening Rush, Closing phases with 1s countdown ticks)
+- Day/Clock HUD (fixed screen Clock/Phase Indicator Strip with MM:SS countdown and color-coded progress bar at y=112)
+
 
 ### Known Limitations
 - Passenger queue can occasionally desync after boarding
