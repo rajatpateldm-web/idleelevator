@@ -1,0 +1,25 @@
+// Gameplay Loops, Spawning Intervals & Reputation Thresholds Balance Configuration
+
+export const TIMING_BALANCE = {
+    // Passenger Spawner
+    PASSENGER_SPAWN_INTERVAL_MS: 3400,
+    SHOPPING_RUSH_EXTRA_SPAWN_DELAY_MS: 1600,
+    MAX_GROUND_QUEUE: 4,
+    KIOSK_SPAWN_CHANCE: 0.35,
+
+    // Timers & Loops
+    OPERATOR_LOOP_MS: 1000,
+    SHOP_RENT_TICK_MS: 6000,
+    AUTO_SAVE_INTERVAL_MS: 5000,
+    COUNTDOWN_TICK_MS: 1000,
+    NATURAL_EVENT_INTERVAL_MS: 75000,
+    NATURAL_EVENT_PROBABILITY: 0.45,
+
+    // Skyscraper Reputation Rating
+    MIN_RATING: 1.0,
+    MAX_RATING: 5.0,
+    DEFAULT_RATING: 3.5,
+    WALKOUT_RATING_PENALTY: -0.10,
+    PREMIUM_CAMPAIGN_MIN_RATING: 2.5,
+    TENANT_DEPARTURE_RATING_THRESHOLD: 1.2
+};
