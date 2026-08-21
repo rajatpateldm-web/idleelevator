@@ -122,10 +122,18 @@ export function renderShopSlot(scene, floor) {
 
     const shop = buildingState.shops[floor];
     const y = floorY[floor];
+    const floorDef = FLOOR_DEFINITIONS[floor];
 
-    const { shopBg, titleText, subText, timerText } = createShopSlotVisual(scene, floor, shop);
+    const { shopBg, titleText, subText, timerText, activityLight } = createShopSlotVisual(scene, floor, shop);
 
-    const container = scene.add.container(290, y + 4, [shopBg, titleText, subText, timerText]).setDepth(2);
+    // Floor Theme Signage / Light Strip
+    const floorLabelBg = scene.add.rectangle(-53, -24, 28, 9, 0x1e293b, 0.9).setStrokeStyle(0.8, 0x475569);
+    const floorLabelText = scene.add.text(-53, -24, `F${floor}`, { fontSize: '6.5px', color: '#94a3b8', fontStyle: 'bold' }).setOrigin(0.5);
+
+    const elements = [shopBg, floorLabelBg, floorLabelText, titleText, subText, timerText];
+    if (activityLight) elements.push(activityLight);
+
+    const container = scene.add.container(290, y + 4, elements).setDepth(2);
 
     shopBg.setInteractive({ useHandCursor: true });
     shopBg.on('pointerdown', () => {

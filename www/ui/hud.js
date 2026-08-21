@@ -14,7 +14,7 @@ import { registerHUDUpdater as registerBuildingHUD } from '../world/building.js'
 import { registerHUDUpdater as registerShopHUD, registerMissionProgress as registerShopMission } from '../systems/shopSystem.js';
 import { registerHUDUpdater as registerPassengerHUD, registerMissionProgress as registerPassengerMission } from '../systems/passengerSystem.js';
 import { registerHUDUpdater as registerAdHUD } from '../ads/adManager.js';
-import { modifyBuildingRating } from '../systems/ratingSystem.js';
+import { modifyBuildingRating, getReputationTier } from '../systems/ratingSystem.js';
 
 export function getMissionBannerString() {
     initDefaultMissions();
@@ -32,7 +32,10 @@ export function getMissionBannerString() {
 export function updateHUD() {
     if (sessionState.coinText) sessionState.coinText.setText(`💰 ${playerState.coins}`);
     if (sessionState.tipText) sessionState.tipText.setText(`💎 ${playerState.tips}`);
-    if (sessionState.ratingText) sessionState.ratingText.setText(`⭐ ${buildingState.buildingRating.toFixed(1)} / 5.0`);
+    if (sessionState.ratingText) {
+        const tier = getReputationTier();
+        sessionState.ratingText.setText(`⭐ ${buildingState.buildingRating.toFixed(1)} / 5.0\n${tier.label}`).setColor(tier.color);
+    }
     if (sessionState.objectiveBannerText) sessionState.objectiveBannerText.setText(getMissionBannerString());
 
     if (sessionState.serviceComboText) {
@@ -123,16 +126,18 @@ export function createPinnedHUD(scene) {
         fontStyle: 'bold'
     }).setDepth(101).setScrollFactor(0);
 
-    // 3. Skyscraper Rating
-    sessionState.ratingText = scene.add.text(138, 22, `⭐ ${buildingState.buildingRating.toFixed(1)} / 5.0`, {
-        fontSize: '11px',
-        color: '#f1e05a',
-        fontStyle: 'bold'
+    // 3. Skyscraper Rating & Reputation Tier
+    const initTier = getReputationTier();
+    sessionState.ratingText = scene.add.text(125, 22, `⭐ ${buildingState.buildingRating.toFixed(1)} / 5.0\n${initTier.label}`, {
+        fontSize: '10px',
+        color: initTier.color,
+        fontStyle: 'bold',
+        align: 'left'
     }).setDepth(101).setScrollFactor(0);
 
     // 4. Service Combo Multiplier Text
-    sessionState.serviceComboText = scene.add.text(138, 38, '', {
-        fontSize: '9.5px',
+    sessionState.serviceComboText = scene.add.text(188, 22, '', {
+        fontSize: '9px',
         color: '#ff9f43',
         fontStyle: 'bold',
         align: 'left'

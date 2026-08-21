@@ -29,9 +29,8 @@
 
 ### Known Limitations
 - Passenger queue can occasionally desync after boarding
-- Floor 4 camera positioning needs testing
-- Mission system still being iterated (listed as "Currently Building")
-- No special passengers yet beyond the defined archetypes
+- Floors 6-10 defined in progression architecture but not yet populated with unique graphics
+- Mission system still being iterated
 - Offline ad doubling falls back to 2x immediately in browser
 
 ---

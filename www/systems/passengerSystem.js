@@ -14,7 +14,7 @@ import { createPassengerEntity, animateWalkTo, getQueuePositionX } from '../enti
 import { triggerStaircaseWalkout } from '../world/stairs.js';
 import { calculatePassengerFare } from './economySystem.js';
 import { getBusinessTypeForFloor } from './shopSystem.js';
-import { modifyBuildingRating } from './ratingSystem.js';
+import { modifyBuildingRating, getReputationTier } from './ratingSystem.js';
 import { checkBoarding, registerTransitionToShopDwell, registerCompleteReturnJourney } from './elevatorSystem.js';
 import { registerSpawnPassenger as registerBuildingSpawn } from '../world/building.js';
 import { registerSpawnPassenger as registerAdSpawn } from '../ads/adManager.js';
@@ -54,7 +54,9 @@ export function spawnPassenger(scene) {
         ECONOMY_BALANCE.MAX_COMBO_SPECIAL_SPAWN_BONUS,
         sessionState.serviceCombo * ECONOMY_BALANCE.COMBO_SPECIAL_SPAWN_BONUS_PER_LEVEL
     );
-    const specialChance = ECONOMY_BALANCE.BASE_SPECIAL_SPAWN_CHANCE + comboSpecialBonus;
+    const repTier = getReputationTier();
+    const repSpecialMult = repTier ? repTier.specialSpawnMult : 1.0;
+    const specialChance = Math.min(0.85, (ECONOMY_BALANCE.BASE_SPECIAL_SPAWN_CHANCE + comboSpecialBonus) * repSpecialMult);
 
     if (!wantsKiosk && activeDestinations.length > 0) {
         targetFloor = Phaser.Utils.Array.GetRandom(activeDestinations);

@@ -122,7 +122,7 @@ export function openHQManagementModal(scene) {
     const modalBg = scene.add.rectangle(180, centerY, 320, 420, 0x161b22).setStrokeStyle(2, 0x58a6ff);
 
     const title = scene.add.text(180, centerY - 180, `🏢 SKYSCRAPER MANAGEMENT`, { fontSize: '13px', color: '#58a6ff', fontStyle: 'bold' }).setOrigin(0.5);
-    const subTitle = scene.add.text(180, centerY - 162, `Building Tier: Level ${playerState.skyscraperLevel} | Prestige Tokens: ⭐ ${playerState.prestigeTokens}`, { fontSize: '9px', color: '#f39c12' }).setOrigin(0.5);
+    const subTitle = scene.add.text(180, centerY - 162, `Building Tier: Level ${playerState.skyscraperLevel} | Management Tokens: 🏆 ${playerState.prestigeTokens}`, { fontSize: '9px', color: '#f39c12' }).setOrigin(0.5);
 
     const statsBox = scene.add.rectangle(180, centerY - 75, 290, 80, 0x0d1117).setStrokeStyle(1, 0x30363d);
     const statsHeader = scene.add.text(180, centerY - 105, '📊 SKYSCRAPER VITAL STATS', { fontSize: '9px', color: '#8b949e', fontStyle: 'bold' }).setOrigin(0.5);
@@ -137,7 +137,7 @@ export function openHQManagementModal(scene) {
 
     const prevModelBtn = scene.add.text(50, centerY + 9, '◀ PREV', { fontSize: '9px', color: '#facc15', fontStyle: 'bold' }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
     const nextModelBtn = scene.add.text(310, centerY + 9, 'NEXT ▶', { fontSize: '9px', color: '#facc15', fontStyle: 'bold' }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
-    const modelStatus = scene.add.text(180, centerY + 9, playerState.prestigeTokens >= curModel.minPrestige ? '✅ ACTIVE' : `🔒 Needs ⭐${curModel.minPrestige} Prestige`, { fontSize: '8px', color: playerState.prestigeTokens >= curModel.minPrestige ? '#2ecc71' : '#e74c3c', fontStyle: 'bold' }).setOrigin(0.5);
+    const modelStatus = scene.add.text(180, centerY + 9, playerState.prestigeTokens >= curModel.minPrestige ? '✅ ACTIVE' : `🔒 Needs 🏆${curModel.minPrestige} Tokens`, { fontSize: '8px', color: playerState.prestigeTokens >= curModel.minPrestige ? '#2ecc71' : '#e74c3c', fontStyle: 'bold' }).setOrigin(0.5);
 
     prevModelBtn.on('pointerdown', () => {
         playSound('click');
@@ -155,18 +155,21 @@ export function openHQManagementModal(scene) {
         openHQManagementModal(scene);
     });
 
-    const canPrestige = buildingState.unlockedFloors.length >= 5 && elevatorState.capacityLevel >= 3;
-    const prestigeBg = scene.add.rectangle(180, centerY + 85, 290, 68, canPrestige ? 0x2e1065 : 0x1f242c).setStrokeStyle(1.5, canPrestige ? 0xa855f7 : 0x475569);
-    const prestigeTitle = scene.add.text(180, centerY + 61, '👑 SKYSCRAPER PRESTIGE / EXPANSION', { fontSize: '9.5px', color: canPrestige ? '#c084fc' : '#94a3b8', fontStyle: 'bold' }).setOrigin(0.5);
-    const prestigeDesc = scene.add.text(180, centerY + 77, canPrestige ? 'Reset floors & upgrades to earn +1 Prestige Token\n(+20% Permanent Coins & Tips Multiplier)' : 'Requirements: 5 Floors Unlocked & Capacity Lv. 3+', { fontSize: '7.5px', color: '#cbd5e1', align: 'center' }).setOrigin(0.5);
+    const tokenReward = Math.max(1, (buildingState.unlockedFloors.length - 2) + Math.floor(elevatorState.capacityLevel / 2) + Math.floor(elevatorState.speedLevel / 2));
+    const canPrestige = buildingState.unlockedFloors.length >= 5 || elevatorState.capacityLevel >= 4;
+    const prestigeBg = scene.add.rectangle(180, centerY + 85, 290, 78, canPrestige ? 0x2e1065 : 0x181e26).setStrokeStyle(1.5, canPrestige ? 0xa855f7 : 0x3b4457);
+    const prestigeTitle = scene.add.text(180, centerY + 53, '🏗️ REDEVELOP BUILDING (PRESTIGE)', { fontSize: '9px', color: canPrestige ? '#c084fc' : '#94a3b8', fontStyle: 'bold' }).setOrigin(0.5);
+    const prestigeDesc = scene.add.text(180, centerY + 73, canPrestige
+        ? `Receive: 🏆 +${tokenReward} Management Tokens\n(+${tokenReward * 5}% Speed/Rent/Offline, +${tokenReward * 3}% Tips)`
+        : 'Requirement: Floor 5 Unlocked or Capacity Lv. 4+', { fontSize: '7.5px', color: canPrestige ? '#f1c40f' : '#cbd5e1', align: 'center', fontStyle: 'bold' }).setOrigin(0.5);
 
-    const prestigeBtn = scene.add.rectangle(180, centerY + 103, 160, 20, canPrestige ? 0x7e22ce : 0x334155).setInteractive({ useHandCursor: canPrestige }).setStrokeStyle(1, 0xffffff, 0.4);
-    const prestigeBtnText = scene.add.text(180, centerY + 103, canPrestige ? '✨ PRESTIGE SKYSCRAPER' : '🔒 PRESTIGE LOCKED', { fontSize: '8px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
+    const prestigeBtn = scene.add.rectangle(180, centerY + 105, 170, 22, canPrestige ? 0x7e22ce : 0x334155).setInteractive({ useHandCursor: canPrestige }).setStrokeStyle(1, 0xffffff, 0.4);
+    const prestigeBtnText = scene.add.text(180, centerY + 105, canPrestige ? `[ REDEVELOP (🏆 +${tokenReward}) ]` : '🔒 REDEVELOP LOCKED', { fontSize: '8px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
 
     if (canPrestige) {
         prestigeBtn.on('pointerdown', () => {
             playSound('build');
-            executeSkyscraperPrestige(scene);
+            executeSkyscraperPrestige(scene, tokenReward);
             hideHQModal();
         });
     }
@@ -193,11 +196,11 @@ export function hideHQModal() {
     }
 }
 
-export function executeSkyscraperPrestige(scene) {
+export function executeSkyscraperPrestige(scene, tokensEarned = 1) {
     playerState.skyscraperLevel++;
-    playerState.prestigeTokens++;
-    playerState.coins = 100 * playerState.prestigeTokens;
-    playerState.tips = 10 * playerState.prestigeTokens;
+    playerState.prestigeTokens += tokensEarned;
+    playerState.coins = 150 * playerState.prestigeTokens;
+    playerState.tips = 15 * playerState.prestigeTokens;
     buildingState.unlockedFloors = [0, 1, 2];
     elevatorState.capacityLevel = 1;
     elevatorState.speedLevel = 1;
@@ -223,14 +226,15 @@ export function executeSkyscraperPrestige(scene) {
     updateUpgradeCards();
     saveGameData();
 
-    playSound('ding');
-    const elevY = elevatorState.elevatorContainer ? elevatorState.elevatorContainer.y : 320;
-    showFloatingText(scene, 180, elevY, `🌟 Prestige Successful! Skyscraper Level ${playerState.skyscraperLevel}!`, '#a855f7');
-
-    createFloorButtons(scene);
-    Object.keys(FLOOR_DEFINITIONS).map(Number).filter(f => f > 0).forEach(f => {
-        renderFloorStructure(scene, f);
-    });
+    if (scene && scene.add) {
+        playSound('ding');
+        const elevY = elevatorState.elevatorContainer ? elevatorState.elevatorContainer.y : 320;
+        showFloatingText(scene, 180, elevY, `🏆 Redeveloped! +${tokensEarned} Management Tokens (Total: ${playerState.prestigeTokens})`, '#a855f7');
+        createFloorButtons(scene);
+        Object.keys(FLOOR_DEFINITIONS).map(Number).filter(f => f > 0).forEach(f => {
+            renderFloorStructure(scene, f);
+        });
+    }
 }
 
 // ─── 3. Breakdown Modal ───────────────────────────────────────────────

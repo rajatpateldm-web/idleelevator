@@ -4,6 +4,7 @@ import { ECONOMY_BALANCE } from '../config/economy.js';
 import { playerState } from '../state/playerState.js';
 import { sessionState } from '../state/sessionState.js';
 import { getBusinessTypeForFloor } from './shopSystem.js';
+import { getReputationTier } from './ratingSystem.js';
 
 export function calculatePassengerFare(passenger) {
     const archetype = passenger.archetype;
@@ -38,9 +39,12 @@ export function calculatePassengerFare(passenger) {
     const businessType = getBusinessTypeForFloor(visitedFloor);
     const businessCoinMult = businessType ? businessType.coinMultiplier : 1.0;
     const businessTipMult = businessType ? businessType.tipMultiplier : 1.0;
+    const repTier = getReputationTier();
+    const repIncomeMult = repTier ? repTier.incomeMult : 1.0;
+    const repTipMult = repTier ? repTier.tipMult : 1.0;
 
     const baseCoins = ECONOMY_BALANCE.BASE_FARE + (floorMultiplier >= ECONOMY_BALANCE.HIGH_FLOOR_BONUS_START ? floorMultiplier * ECONOMY_BALANCE.HIGH_FLOOR_BONUS_MULTIPLIER : 0);
-    let earnedCoins = Math.round(baseCoins * archCoinMult * businessCoinMult * prestigeBonus * investorBonus * comboMultiplier * corpEventBonus);
+    let earnedCoins = Math.round(baseCoins * archCoinMult * businessCoinMult * prestigeBonus * investorBonus * comboMultiplier * corpEventBonus * repIncomeMult);
 
     if (archetype.isRusher && passenger.patience > (passenger.maxPatience * ECONOMY_BALANCE.RUSHER_PATIENCE_THRESHOLD_PCT)) {
         earnedCoins = Math.round(earnedCoins * ECONOMY_BALANCE.RUSHER_SPEED_BONUS_MULTIPLIER);
@@ -63,7 +67,7 @@ export function calculatePassengerFare(passenger) {
         rawTips = (typeof Phaser !== 'undefined' && Phaser.Math && Phaser.Math.Between)
             ? Phaser.Math.Between(tipRange.min, tipRange.max)
             : Math.floor(Math.random() * (tipRange.max - tipRange.min + 1)) + tipRange.min;
-        earnedTips = Math.round(rawTips * businessTipMult * prestigeBonus * modelTipMultiplier * investorBonus * happyHourTipMult);
+        earnedTips = Math.round(rawTips * businessTipMult * prestigeBonus * modelTipMultiplier * investorBonus * happyHourTipMult * repTipMult);
     }
 
     const archetypeRating = archetype.ratingBonus || 0.05;

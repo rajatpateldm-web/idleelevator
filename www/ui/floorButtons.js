@@ -14,6 +14,7 @@ export function registerOpenBreakdownModal(fn) {
 }
 
 export function createFloorButtons(scene) {
+    if (!scene || !scene.add) return;
     const allFloors = Object.keys(FLOOR_DEFINITIONS).map(Number).sort((a, b) => a - b);
     allFloors.forEach(f => {
         if (sessionState.floorButtonContainers[f]) {
